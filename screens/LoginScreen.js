@@ -44,7 +44,8 @@ export default class LoginScreen extends React.Component {
                                rightText={this.state.rightText}/>
                 <ButtonSubmit getFormData={this.getFormData}
                               submitUrl={this.state.submitUrl}
-                              submitText={this.state.submitText}/>
+                              submitText={this.state.submitText}
+                              action={this.state.current}/>
             </View>
         );
     }
@@ -92,7 +93,7 @@ export default class LoginScreen extends React.Component {
                 current: 'resetpwd',
                 leftText: 'Đăng ký',
                 rightText: 'Đăng nhập',
-                submitText: 'Gửi',
+                submitText: 'Quên mật khẩu',
                 submitUrl: APIs.RESETPWD,
                 showPasswordInput: false,
             })

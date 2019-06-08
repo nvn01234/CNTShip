@@ -3,16 +3,16 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
-import HomeScreen from '../screens/HomeScreen';
+import OrdersScreen from '../screens/OrdersScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
 const HomeStack = createStackNavigator({
-  Home: HomeScreen,
+  Home: OrdersScreen,
 });
 
 HomeStack.navigationOptions = {
-  tabBarLabel: 'Danh sách đơn',
+  tabBarLabel: 'Đơn online',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
@@ -30,7 +30,7 @@ const LinksStack = createStackNavigator({
 });
 
 LinksStack.navigationOptions = {
-  tabBarLabel: 'Lịch sử đơn',
+  tabBarLabel: 'Lịch sử giao nhận',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
