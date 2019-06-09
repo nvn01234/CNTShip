@@ -4,6 +4,7 @@ import {AppLoading, Asset, Font, Icon} from 'expo';
 import {Router, Scene} from "react-native-router-flux";
 import LoginScreen from "./screens/LoginScreen";
 import LoggedInScreen from "./screens/LoggedInScreen";
+import ChangePasswordScreen from "./screens/ChangePasswordScreen";
 
 export default class App extends React.Component {
     state = {

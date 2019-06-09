@@ -1,11 +1,13 @@
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Easing } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
 import OrdersScreen from '../screens/OrdersScreen';
 import LinksScreen from '../screens/LinksScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ChangePasswordScreen from "../screens/ChangePasswordScreen";
+import { fromLeft, fromRight } from 'react-navigation-transitions';
 
 const HomeStack = createStackNavigator({
   Home: OrdersScreen,
@@ -40,7 +42,10 @@ LinksStack.navigationOptions = {
 };
 
 const SettingsStack = createStackNavigator({
-  Settings: ProfileScreen,
+  Profile: ProfileScreen,
+  ChangePassword: ChangePasswordScreen,
+}, {
+  transitionConfig: () => fromRight(),
 });
 
 SettingsStack.navigationOptions = {
