@@ -8,7 +8,7 @@ import PasswordInput from "./PasswordInput";
 export default class Form extends Component {
     render() {
         return (
-            <KeyboardAvoidingView behavior="padding" style={styles.container}>
+            <KeyboardAvoidingView behavior="padding" style={{...styles.container, flex: this.props.showConfirmPasswordInput ? 2: 1}}>
                 <UserInput
                     source={usernameImg}
                     placeholder="Tên đăng nhập"
@@ -27,6 +27,16 @@ export default class Form extends Component {
                         onChangeText={this.props.onPasswordChange}
                     />
                 ): null}
+                {this.props.showConfirmPasswordInput ? (
+                    <PasswordInput
+                        source={passwordImg}
+                        placeholder="Nhập lại mật khẩu"
+                        returnKeyType={'done'}
+                        autoCapitalize={'none'}
+                        autoCorrect={false}
+                        onChangeText={this.props.onConfirmPasswordChange}
+                    />
+                ) : null}
             </KeyboardAvoidingView>
         );
     }
@@ -34,7 +44,7 @@ export default class Form extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 2,
         alignItems: 'center',
     },
 });

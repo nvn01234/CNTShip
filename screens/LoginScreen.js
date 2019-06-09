@@ -15,6 +15,7 @@ export default class LoginScreen extends React.Component {
         this.state = {
             username: '',
             password: '',
+            confirmPassword: '',
 
             current: 'login',
             leftText: 'Đăng ký',
@@ -22,10 +23,12 @@ export default class LoginScreen extends React.Component {
             submitText: 'Đăng nhập',
             submitUrl: APIs.LOGIN,
             showPasswordInput: true,
+            showConfirmPasswordInput: false,
         };
 
         this.onUsernameChange = this.onUsernameChange.bind(this);
         this.onPasswordChange = this.onPasswordChange.bind(this);
+        this.onConfirmPasswordChange = this.onConfirmPasswordChange.bind(this);
         this.getFormData = this.getFormData.bind(this);
         this.leftAction = this.leftAction.bind(this);
         this.rightAction = this.rightAction.bind(this);
@@ -37,11 +40,14 @@ export default class LoginScreen extends React.Component {
                 <Logo/>
                 <Form onUsernameChange={this.onUsernameChange}
                       onPasswordChange={this.onPasswordChange}
-                      showPasswordInput={this.state.showPasswordInput}/>
+                      onConfirmPasswordChange={this.onConfirmPasswordChange}
+                      showPasswordInput={this.state.showPasswordInput}
+                      showConfirmPasswordInput={this.state.showConfirmPasswordInput}/>
                 <BottomSection leftAction={this.leftAction}
                                rightAction={this.rightAction}
                                leftText={this.state.leftText}
-                               rightText={this.state.rightText}/>
+                               rightText={this.state.rightText}
+                               action={this.state.current}/>
                 <ButtonSubmit getFormData={this.getFormData}
                               submitUrl={this.state.submitUrl}
                               submitText={this.state.submitText}
@@ -58,10 +64,15 @@ export default class LoginScreen extends React.Component {
         this.setState({password})
     }
 
+    onConfirmPasswordChange(confirmPassword) {
+        this.setState({confirmPassword})
+    }
+
     getFormData() {
         return {
             username: this.state.username,
             ...(this.state.showPasswordInput ? {password: this.state.password} : {}),
+            ...(this.state.showConfirmPasswordInput ? {confirmPassword: this.state.confirmPassword}: {}),
         }
     }
 
@@ -74,6 +85,7 @@ export default class LoginScreen extends React.Component {
                 submitText: 'Đăng ký',
                 submitUrl: APIs.SIGNUP,
                 showPasswordInput: true,
+                showConfirmPasswordInput: true,
             })
         } else if (this.state.current === 'signup') {
             this.setState({
@@ -83,6 +95,7 @@ export default class LoginScreen extends React.Component {
                 submitText: 'Đăng nhập',
                 submitUrl: APIs.LOGIN,
                 showPasswordInput: true,
+                showConfirmPasswordInput: false,
             })
         }
     }
@@ -96,6 +109,7 @@ export default class LoginScreen extends React.Component {
                 submitText: 'Quên mật khẩu',
                 submitUrl: APIs.RESETPWD,
                 showPasswordInput: false,
+                showConfirmPasswordInput: false,
             })
         } else if (this.state.current === 'resetpwd') {
             this.setState({
@@ -105,6 +119,7 @@ export default class LoginScreen extends React.Component {
                 submitText: 'Đăng nhập',
                 submitUrl: APIs.LOGIN,
                 showPasswordInput: true,
+                showConfirmPasswordInput: false,
             })
         }
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, AsyncStorage} from 'react-native';
 import {AppLoading, Asset, Font, Icon} from 'expo';
 import {Router, Scene} from "react-native-router-flux";
 import LoginScreen from "./screens/LoginScreen";
@@ -8,7 +8,15 @@ import LoggedInScreen from "./screens/LoggedInScreen";
 export default class App extends React.Component {
     state = {
         isLoadingComplete: false,
+        hasToken: false,
     };
+
+    componentWillMount() {
+        AsyncStorage.getItem('access_token').then((token) => {
+            console.log(`Has token: ${token}`);
+            this.setState({ hasToken: token !== null })
+        })
+    }
 
     render() {
         if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
@@ -28,12 +36,13 @@ export default class App extends React.Component {
                                    component={LoginScreen}
                                    animation="fade"
                                    hideNavBar={true}
-                                   initial={true}
+                                   initial={!this.state.hasToken}
                             />
                             <Scene key="loggedInScreen"
                                    component={LoggedInScreen}
                                    animation="fade"
                                    hideNavBar={true}
+                                   initial={this.state.hasToken}
                             />
                         </Scene>
                     </Router>

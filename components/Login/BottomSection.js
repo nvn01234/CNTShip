@@ -8,7 +8,7 @@ export default class BottomSection extends Component {
 
     render() {
         return (
-            <View style={styles.container}>
+            <View style={{...styles.container, flex: this.props.action === 'signup' ? 2: 1}}>
                 <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={this.props.leftAction}
@@ -30,7 +30,7 @@ const DEVICE_WIDTH = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 2,
         top: 65,
         width: DEVICE_WIDTH,
         flexDirection: 'row',

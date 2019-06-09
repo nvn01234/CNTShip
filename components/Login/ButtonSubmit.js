@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ActivityIndicator, Animated, Dimensions, Easing, StyleSheet, Text, TouchableOpacity, View, AsyncStorage} from 'react-native';
-import {Actions} from 'react-native-router-flux';
+import {Actions, ActionConst} from 'react-native-router-flux';
 import API from '../../constants/API';
 import Toast from 'react-native-simple-toast';
 
@@ -24,23 +24,29 @@ export default class ButtonSubmit extends Component {
     _onPress() {
         if (this.state.isLoading) return;
 
-        this.setState({isLoading: true});
-        Animated.timing(this.buttonAnimated, {
-            toValue: 1,
-            duration: 200,
-            easing: Easing.linear,
-        }).start();
-
         const formData = this.props.getFormData();
-        this._submitForm(this.props.submitUrl, formData,(responseJson) => {
-            if (this.props.action === 'login') {
-                this._loginCallback(responseJson);
-            } else if (this.props.action === 'signup') {
-                this._submitForm(API.LOGIN, formData, this._loginCallback);
-            } else if (this.props.action === 'resetpwd') {
-                this._loginCallback(responseJson);
+        if (this.props.action === 'signup' && formData.confirmPassword !== formData.password) {
+            Toast.show('Mật khẩu lần 2 không khớp mật khẩu lần 1');
+        } else {
+            if (this.props.action === 'signup') {
+                delete formData.confirmPassword;
             }
-        });
+            this.setState({isLoading: true});
+            Animated.timing(this.buttonAnimated, {
+                toValue: 1,
+                duration: 200,
+                easing: Easing.linear,
+            }).start();
+            this._submitForm(this.props.submitUrl, formData).then((responseJson) => {
+                if (this.props.action === 'login') {
+                    this._loginCallback(responseJson);
+                } else if (this.props.action === 'signup') {
+                    this._submitForm(API.LOGIN, formData).then(this._loginCallback);
+                } else if (this.props.action === 'resetpwd') {
+                    this._loginCallback(responseJson);
+                }
+            });
+        }
     }
 
     _transformAPIMsg(message) {
@@ -59,38 +65,40 @@ export default class ButtonSubmit extends Component {
         return message;
     }
 
-    _submitForm (url, formData, successCallback) {
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        }).then(response => response.json())
-        .then(responseJson => {
-            console.log(responseJson);
-            if (responseJson.success) {
-                successCallback(responseJson);
-            } else {
-                const message = this._transformAPIMsg(responseJson.message);
-                Toast.show(message);
-                this.setState({isLoading: false});
-                this.buttonAnimated.setValue(0);
-                this.growAnimated.setValue(0);
-            }
-        }).catch(error => {
-            Toast.show("Có lỗi xảy ra, vui lòng thử lại");
-        });
+    _submitForm (url, formData) {
+        return new Promise((resolve) => {
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            }).then(response => response.json())
+            .then(responseJson => {
+                console.log(responseJson);
+                if (responseJson.success) {
+                    resolve(responseJson);
+                } else {
+                    const message = this._transformAPIMsg(responseJson.message);
+                    Toast.show(message);
+                    this._stopLoading();
+                }
+            }).catch(error => {
+                Toast.show("Có lỗi xảy ra, vui lòng thử lại");
+                this._stopLoading();
+            });
+        })
     }
 
     _loginCallback(responseJson) {
-        AsyncStorage.setItem('access_token', responseJson.data.access_token).then(() => {
+        Promise.all([
+            AsyncStorage.setItem('access_token', responseJson.data.access_token),
+            AsyncStorage.removeItem('user_profile'),
+        ]).then(() => {
             this._onGrow();
-            Actions.loggedInScreen();
-            this.setState({isLoading: false});
-            this.buttonAnimated.setValue(0);
-            this.growAnimated.setValue(0);
+            Actions.loggedInScreen({type: ActionConst.RESET});
+            this._stopLoading();
         });
     }
 
@@ -100,6 +108,12 @@ export default class ButtonSubmit extends Component {
             duration: 200,
             easing: Easing.linear,
         }).start();
+    }
+
+    _stopLoading() {
+        this.setState({isLoading: false});
+        this.buttonAnimated.setValue(0);
+        this.growAnimated.setValue(0);
     }
 
     render() {
@@ -113,7 +127,7 @@ export default class ButtonSubmit extends Component {
         });
 
         return (
-            <View style={styles.container}>
+            <View style={{...styles.container, top: this.props.action === 'signup' ? -135 : -95}}>
                 <Animated.View style={{width: changeWidth}}>
                     <TouchableOpacity
                         style={styles.button}
@@ -137,7 +151,7 @@ export default class ButtonSubmit extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        top: -95,
+        // top: -135,
         alignItems: 'center',
         justifyContent: 'flex-start',
     },
