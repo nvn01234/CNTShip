@@ -17,11 +17,9 @@ export default class ButtonSubmit extends Component {
 
         this.buttonAnimated = new Animated.Value(0);
         this.growAnimated = new Animated.Value(0);
-        this._onPress = this._onPress.bind(this);
-        this._loginCallback = this._loginCallback.bind(this);
     }
 
-    _onPress() {
+    _onPress = () => {
         if (this.state.isLoading) return;
 
         const formData = this.props.getFormData();
@@ -47,9 +45,9 @@ export default class ButtonSubmit extends Component {
                 }
             });
         }
-    }
+    };
 
-    _transformAPIMsg(message) {
+    _transformAPIMsg = (message) => {
         const regex = /^Trường `([^`]+)` được yêu cầu$/;
         const FIELD_MAP = {
             username: 'tên đăng nhập',
@@ -63,7 +61,7 @@ export default class ButtonSubmit extends Component {
             }
         }
         return message;
-    }
+    };
 
     _submitForm (url, formData) {
         return new Promise((resolve) => {
@@ -84,23 +82,23 @@ export default class ButtonSubmit extends Component {
                     Toast.show(message);
                     this._stopLoading();
                 }
-            }).catch(error => {
+            }).catch(() => {
                 Toast.show("Có lỗi xảy ra, vui lòng thử lại");
                 this._stopLoading();
             });
         })
     }
 
-    _loginCallback(responseJson) {
+    _loginCallback = (responseJson) => {
         Promise.all([
             AsyncStorage.setItem('access_token', responseJson.data.access_token),
             AsyncStorage.removeItem('user_profile'),
         ]).then(() => {
             this._onGrow();
-            Actions.loggedInScreen({type: ActionConst.RESET});
             this._stopLoading();
+            Actions.loggedInScreen({type: ActionConst.RESET});
         });
-    }
+    };
 
     _onGrow() {
         Animated.timing(this.growAnimated, {

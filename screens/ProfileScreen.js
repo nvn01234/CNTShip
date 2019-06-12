@@ -19,15 +19,15 @@ export default class ProfileScreen extends React.Component {
             user_profile: null,
             refreshing: false,
         };
-        this._onRefresh = this._onRefresh.bind(this);
     }
 
     componentDidMount() {
+        console.log("componentDidMount");
         AsyncStorage.getItem('user_profile').then(user_profile => {
             if (user_profile === null) {
                 this._onRefresh();
             } else {
-                this.setState({user_profile})
+                this.setState({user_profile: JSON.parse(user_profile)})
             }
         });
     }
@@ -54,7 +54,7 @@ export default class ProfileScreen extends React.Component {
                             Toast.show(responseJson.message);
                             this.setState({refreshing: false});
                         }
-                    }).catch(error => {
+                    }).catch(() => {
                     Toast.show("Có lỗi xảy ra, vui lòng thử lại");
                     this.setState({refreshing: false});
                 });

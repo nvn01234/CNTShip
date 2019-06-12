@@ -5,7 +5,6 @@ import Form from '../components/Login/Form';
 import BottomSection from '../components/Login/BottomSection';
 import ButtonSubmit from '../components/Login/ButtonSubmit';
 
-import bgSrc from '../assets/images/wallpaper.png';
 import APIs from '../constants/API';
 
 export default class LoginScreen extends React.Component {
@@ -25,18 +24,11 @@ export default class LoginScreen extends React.Component {
             showPasswordInput: true,
             showConfirmPasswordInput: false,
         };
-
-        this.onUsernameChange = this.onUsernameChange.bind(this);
-        this.onPasswordChange = this.onPasswordChange.bind(this);
-        this.onConfirmPasswordChange = this.onConfirmPasswordChange.bind(this);
-        this.getFormData = this.getFormData.bind(this);
-        this.leftAction = this.leftAction.bind(this);
-        this.rightAction = this.rightAction.bind(this);
     }
 
     render() {
         return (
-            <View style={styles.container} source={bgSrc}>
+            <View style={styles.container}>
                 <Logo/>
                 <Form onUsernameChange={this.onUsernameChange}
                       onPasswordChange={this.onPasswordChange}
@@ -56,27 +48,27 @@ export default class LoginScreen extends React.Component {
         );
     }
 
-    onUsernameChange(username) {
+    onUsernameChange = (username) => {
         this.setState({username})
-    }
+    };
 
-    onPasswordChange(password) {
+    onPasswordChange = (password) => {
         this.setState({password})
-    }
+    };
 
-    onConfirmPasswordChange(confirmPassword) {
+    onConfirmPasswordChange = (confirmPassword) => {
         this.setState({confirmPassword})
-    }
+    };
 
-    getFormData() {
+    getFormData = () => {
         return {
             username: this.state.username,
             ...(this.state.showPasswordInput ? {password: this.state.password} : {}),
             ...(this.state.showConfirmPasswordInput ? {confirmPassword: this.state.confirmPassword}: {}),
         }
-    }
+    };
 
-    leftAction() {
+    leftAction = () => {
         if (this.state.current === 'login' || this.state.current === 'resetpwd') {
             this.setState({
                 current: 'signup',
@@ -98,9 +90,9 @@ export default class LoginScreen extends React.Component {
                 showConfirmPasswordInput: false,
             })
         }
-    }
+    };
 
-    rightAction() {
+    rightAction = () => {
         if (this.state.current === 'login' || this.state.current === 'signup') {
             this.setState({
                 current: 'resetpwd',
@@ -122,7 +114,7 @@ export default class LoginScreen extends React.Component {
                 showConfirmPasswordInput: false,
             })
         }
-    }
+    };
 }
 
 const styles = StyleSheet.create({

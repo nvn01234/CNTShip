@@ -54,7 +54,8 @@ const styles = StyleSheet.create({
         color: '#ffffff',
     },
     inputWrapper: {
-        flex: 1,
+        // flex: 1,
+        marginTop: 20,
     },
     inlineImg: {
         position: 'absolute',
