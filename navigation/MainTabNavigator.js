@@ -1,28 +1,23 @@
 import React from 'react';
-import { Platform, Easing } from 'react-native';
-import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
+import {createBottomTabNavigator, createStackNavigator} from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
 import OrdersScreen from '../screens/OrdersScreen';
 import LinksScreen from '../screens/LinksScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ChangePasswordScreen from "../screens/ChangePasswordScreen";
-import { fromLeft, fromRight } from 'react-navigation-transitions';
+import {fromRight} from 'react-navigation-transitions';
 
-const HomeStack = createStackNavigator({
-  Home: OrdersScreen,
+const OrdersStack = createStackNavigator({
+  Orders: OrdersScreen,
 });
 
-HomeStack.navigationOptions = {
+OrdersStack.navigationOptions = {
   tabBarLabel: 'Đơn online',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? `ios-list${focused ? '' : '-outline'}`
-          : 'md-list'
-      }
+      name='sticky-note'
     />
   ),
 };
@@ -36,7 +31,7 @@ LinksStack.navigationOptions = {
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-paper' : 'md-paper'}
+      name='list'
     />
   ),
 };
@@ -53,13 +48,13 @@ SettingsStack.navigationOptions = {
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-person' : 'md-person'}
+      name='user'
     />
   ),
 };
 
 export default createBottomTabNavigator({
-  HomeStack,
+  HomeStack: OrdersStack,
   LinksStack,
   SettingsStack,
 });

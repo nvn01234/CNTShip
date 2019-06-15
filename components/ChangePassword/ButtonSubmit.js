@@ -15,10 +15,9 @@ export default class ButtonSubmit extends Component {
         };
 
         this.buttonAnimated = new Animated.Value(0);
-        this.growAnimated = new Animated.Value(0);
     }
 
-    _onPress = () => {
+    _onPress = async() => {
         if (this.state.isLoading) return;
 
         const {oldPassword, password, confirmPassword} = this.props.getFormData();
@@ -38,88 +37,80 @@ export default class ButtonSubmit extends Component {
             return;
         }
 
-        this.setState({isLoading: true});
-        Animated.timing(this.buttonAnimated, {
-            toValue: 1,
-            duration: 200,
-            easing: Easing.linear,
-        }).start();
-
-        AsyncStorage.getItem('user_profile').then(user_profile => {
-           const {username} = JSON.parse(user_profile);
-            // Check mật khẩu cũ bằng cách đăng nhập
-           fetch(API_URL.LOGIN, {
-               method: 'POST',
-               headers: {
-                   'Accept': 'application/json',
-                   'Content-Type': 'application/json'
-               },
-               body: JSON.stringify({username, password: oldPassword})
-           }).then(
-               response => response.json()
-           ).then(responseJson => {
-               console.log(responseJson);
-               if (responseJson.success) {
-                   // Đổi mật khẩu
-                   fetch(API_URL.CHANGE_PWD, {
-                       method: 'POST',
-                       headers: {
-                           'Accept': 'application/json',
-                           'Content-Type': 'application/json',
-                           'access-token': responseJson.data.access_token,
-                       },
-                       body: JSON.stringify({password}),
-                   }).then(
-                       response => response.json()
-                   ).then(responseJson => {
-                       console.log(responseJson);
-                       if (responseJson.success) {
-                           this._onGrow();
-                           this._stopLoading();
-                           this.props.navigation.goBack();
-                           Toast.show('Đổi mật khẩu thành công');
-                       } else {
-                           Toast.show(responseJson.message);
-                           this._stopLoading();
-                       }
-                   }).catch(() => {
-                       Toast.show('Có lỗi xảy ra, vui lòng thử lại');
-                       this._stopLoading();
-                   });
-               } else {
-                   Toast.show(responseJson.message);
-                   this._stopLoading();
-               }
-           }).catch(() => {
-               Toast.show('Có lỗi xảy ra, vui lòng thử lại');
-               this._stopLoading();
-           });
+        await new Promise((resolve) => {
+            this.setState({isLoading: true}, resolve);
         });
+        const [, user_profile] = await Promise.all([
+            new Promise((resolve) => {
+                Animated.timing(this.buttonAnimated, {
+                    toValue: 1,
+                    duration: 200,
+                    easing: Easing.linear,
+                }).start(resolve);
+            }),
+            AsyncStorage.getItem('user_profile')
+        ]);
 
-    }
-
-    _onGrow() {
-        Animated.timing(this.growAnimated, {
-            toValue: 1,
-            duration: 200,
-            easing: Easing.linear,
-        }).start();
-    }
+        const {username} = JSON.parse(user_profile);
+        // Check mật khẩu cũ bằng cách đăng nhập
+        await new Promise((resolve) => {
+            fetch(API_URL.LOGIN, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({username, password: oldPassword})
+            }).then(
+                response => response.json()
+            ).then(responseJson => {
+                console.log(responseJson);
+                if (responseJson.success) {
+                    // Đổi mật khẩu
+                    fetch(API_URL.CHANGE_PWD, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'access-token': responseJson.data.access_token,
+                        },
+                        body: JSON.stringify({password}),
+                    }).then(
+                        response => response.json()
+                    ).then(responseJson => {
+                        console.log(responseJson);
+                        if (responseJson.success) {
+                            this._stopLoading().then(resolve);
+                            this.props.navigation.goBack();
+                            Toast.show('Đổi mật khẩu thành công');
+                        } else {
+                            Toast.show(responseJson.message);
+                            this._stopLoading().then();
+                        }
+                    }).catch(() => {
+                        Toast.show('Có lỗi xảy ra, vui lòng thử lại');
+                        this._stopLoading().then();
+                    });
+                } else {
+                    Toast.show(responseJson.message);
+                    this._stopLoading().then();
+                }
+            }).catch(() => {
+                Toast.show('Có lỗi xảy ra, vui lòng thử lại');
+                this._stopLoading().then();
+            });
+        });
+    };
 
     _stopLoading() {
         this.setState({isLoading: false});
         this.buttonAnimated.setValue(0);
-        this.growAnimated.setValue(0);
     }
 
     render() {
         const changeWidth = this.buttonAnimated.interpolate({
             inputRange: [0, 1],
             outputRange: [DEVICE_WIDTH - MARGIN, MARGIN],
-        });
-        const changeScale = this.growAnimated.interpolate({
-            inputRange: [0, 1],
-            outputRange: [1, MARGIN],
         });
 
         return (
@@ -135,9 +126,6 @@ export default class ButtonSubmit extends Component {
                             <Text style={styles.text}>Đổi mật khẩu</Text>
                         )}
                     </TouchableOpacity>
-                    <Animated.View
-                        style={[styles.circle, {transform: [{scale: changeScale}]}]}
-                    />
                 </Animated.View>
             </View>
         );

@@ -24,51 +24,39 @@ export default class ButtonLogout extends Component {
         };
 
         this.buttonAnimated = new Animated.Value(0);
-        this.growAnimated = new Animated.Value(0);
     }
 
-    _onPress = () => {
+    _onPress = async () => {
         if (this.state.isLoading) return;
-
-        this.setState({isLoading: true});
-        Animated.timing(this.buttonAnimated, {
-            toValue: 1,
-            duration: 200,
-            easing: Easing.linear,
-        }).start();
-
-        Promise.all([
+        await new Promise(resolve => {
+            this.setState({isLoading: true}, resolve);
+        });
+        await Promise.all([
+            new Promise(resolve => {
+                Animated.timing(this.buttonAnimated, {
+                    toValue: 1,
+                    duration: 200,
+                    easing: Easing.linear,
+                }).start(resolve);
+            }),
             AsyncStorage.removeItem('access_token'),
             AsyncStorage.removeItem('user_profile')
-        ]).then(() => {
-            this._stopLoading();
-            this._onGrow();
-            Actions.loginScreen({type: ActionConst.RESET});
-        });
+        ]);
+        await this._stopLoading();
+        Actions.loginScreen({type: ActionConst.RESET});
     };
 
-    _onGrow() {
-        Animated.timing(this.growAnimated, {
-            toValue: 1,
-            duration: 200,
-            easing: Easing.linear,
-        }).start();
-    }
-
     _stopLoading = () => {
-        this.setState({isLoading: false});
-        this.buttonAnimated.setValue(0);
-        this.growAnimated.setValue(0);
+        return new Promise(resolve => {
+            this.buttonAnimated.setValue(0);
+            this.setState({isLoading: false}, resolve);
+        });
     };
 
     render() {
         const changeWidth = this.buttonAnimated.interpolate({
             inputRange: [0, 1],
             outputRange: [DEVICE_WIDTH - MARGIN, MARGIN],
-        });
-        const changeScale = this.growAnimated.interpolate({
-            inputRange: [0, 1],
-            outputRange: [1, MARGIN],
         });
 
         return (
@@ -84,9 +72,6 @@ export default class ButtonLogout extends Component {
                             <Text style={styles.text}>Đăng xuất</Text>
                         )}
                     </TouchableOpacity>
-                    <Animated.View
-                        style={[styles.circle, {transform: [{scale: changeScale}]}]}
-                    />
                 </Animated.View>
             </View>
         );

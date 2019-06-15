@@ -16,10 +16,9 @@ export default class ButtonSubmit extends Component {
         };
 
         this.buttonAnimated = new Animated.Value(0);
-        this.growAnimated = new Animated.Value(0);
     }
 
-    _onPress = () => {
+    _onPress = async () => {
         if (this.state.isLoading) return;
 
         const formData = this.props.getFormData();
@@ -29,21 +28,28 @@ export default class ButtonSubmit extends Component {
             if (this.props.action === 'signup') {
                 delete formData.confirmPassword;
             }
-            this.setState({isLoading: true});
-            Animated.timing(this.buttonAnimated, {
-                toValue: 1,
-                duration: 200,
-                easing: Easing.linear,
-            }).start();
-            this._submitForm(this.props.submitUrl, formData).then((responseJson) => {
-                if (this.props.action === 'login') {
-                    this._loginCallback(responseJson);
-                } else if (this.props.action === 'signup') {
-                    this._submitForm(API.LOGIN, formData).then(this._loginCallback);
-                } else if (this.props.action === 'resetpwd') {
-                    this._loginCallback(responseJson);
-                }
+            await new Promise(resolve => {
+                this.setState({isLoading: true}, resolve);
             });
+            const [,responseJson] = await Promise.all([
+                new Promise(resolve => {
+                    Animated.timing(this.buttonAnimated, {
+                        toValue: 1,
+                        duration: 200,
+                        easing: Easing.linear,
+                    }).start(resolve);
+                }),
+                this._submitForm(this.props.submitUrl, formData),
+            ]);
+            if (responseJson) {
+                let loginResponse = responseJson;
+                if (this.props.action === 'signup') {
+                    loginResponse = await this._submitForm(API.LOGIN, formData);
+                }
+                if (loginResponse) {
+                    await this._loginCallback(loginResponse);
+                }
+            }
         }
     };
 
@@ -63,7 +69,7 @@ export default class ButtonSubmit extends Component {
         return message;
     };
 
-    _submitForm (url, formData) {
+    _submitForm = (url, formData) => {
         return new Promise((resolve) => {
             fetch(url, {
                 method: 'POST',
@@ -73,55 +79,42 @@ export default class ButtonSubmit extends Component {
                 },
                 body: JSON.stringify(formData)
             }).then(response => response.json())
-            .then(responseJson => {
+            .then((responseJson) => {
                 console.log(responseJson);
                 if (responseJson.success) {
                     resolve(responseJson);
                 } else {
                     const message = this._transformAPIMsg(responseJson.message);
                     Toast.show(message);
-                    this._stopLoading();
+                    this._stopLoading().then();
                 }
             }).catch(() => {
                 Toast.show("Có lỗi xảy ra, vui lòng thử lại");
-                this._stopLoading();
+                this._stopLoading().then();
             });
         })
-    }
-
-    _loginCallback = (responseJson) => {
-        Promise.all([
-            AsyncStorage.setItem('access_token', responseJson.data.access_token),
-            AsyncStorage.removeItem('user_profile'),
-        ]).then(() => {
-            this._onGrow();
-            this._stopLoading();
-            Actions.loggedInScreen({type: ActionConst.RESET});
-        });
     };
 
-    _onGrow() {
-        Animated.timing(this.growAnimated, {
-            toValue: 1,
-            duration: 200,
-            easing: Easing.linear,
-        }).start();
-    }
+    _loginCallback = async (responseJson) => {
+        await Promise.all([
+            AsyncStorage.setItem('access_token', responseJson.data.access_token),
+            AsyncStorage.removeItem('user_profile'),
+        ]);
+        await this._stopLoading();
+        Actions.loggedInScreen({type: ActionConst.RESET});
+    };
 
-    _stopLoading() {
-        this.setState({isLoading: false});
-        this.buttonAnimated.setValue(0);
-        this.growAnimated.setValue(0);
-    }
+    _stopLoading = () => {
+        return new Promise(resolve => {
+            this.buttonAnimated.setValue(0);
+            this.setState({isLoading: false}, resolve);
+        });
+    };
 
     render() {
         const changeWidth = this.buttonAnimated.interpolate({
             inputRange: [0, 1],
             outputRange: [DEVICE_WIDTH - MARGIN, MARGIN],
-        });
-        const changeScale = this.growAnimated.interpolate({
-            inputRange: [0, 1],
-            outputRange: [1, MARGIN],
         });
 
         return (
@@ -137,9 +130,6 @@ export default class ButtonSubmit extends Component {
                             <Text style={styles.text}>{this.props.submitText}</Text>
                         )}
                     </TouchableOpacity>
-                    <Animated.View
-                        style={[styles.circle, {transform: [{scale: changeScale}]}]}
-                    />
                 </Animated.View>
             </View>
         );
@@ -149,7 +139,6 @@ export default class ButtonSubmit extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // top: -135,
         alignItems: 'center',
         justifyContent: 'flex-start',
     },

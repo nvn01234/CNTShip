@@ -1,10 +1,11 @@
-import React from 'react';
-import {StyleSheet, View, AsyncStorage} from 'react-native';
-import {AppLoading, Asset, Font, Icon} from 'expo';
-import {Router, Scene} from "react-native-router-flux";
-import LoginScreen from "./screens/LoginScreen";
-import LoggedInScreen from "./screens/LoggedInScreen";
-import ChangePasswordScreen from "./screens/ChangePasswordScreen";
+import React from 'react'
+import {StyleSheet, View, AsyncStorage} from 'react-native'
+import {AppLoading, Asset, Font, Icon} from 'expo'
+import { FontAwesome } from 'react-native-vector-icons';
+import {Router, Scene} from "react-native-router-flux"
+import LoginScreen from "./screens/LoginScreen"
+import LoggedInScreen from "./screens/LoggedInScreen"
+
 
 export default class App extends React.Component {
     state = {
@@ -59,13 +60,10 @@ export default class App extends React.Component {
                 require('./assets/images/eye_black.png'),
                 require('./assets/images/username.png'),
                 require('./assets/images/password.png'),
+                require('./assets/images/logo.png'),
             ]),
             Font.loadAsync({
-                // This is the font that we are using for our tab bar
-                ...Icon.Ionicons.font,
-                // We include SpaceMono because we use it in OrdersScreenen.js. Feel free
-                // to remove this if you are not using it in your app
-                'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
+                ...FontAwesome.font,
             }),
         ]);
     };
