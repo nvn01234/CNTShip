@@ -24,47 +24,44 @@ export default class ButtonSubmit extends Component {
         const formData = this.props.getFormData();
         if (this.props.action === 'signup' && formData.confirmPassword !== formData.password) {
             Toast.show('Mật khẩu lần 2 không khớp mật khẩu lần 1');
-        } else {
+            return;
+        }
+
+        if (this.props.action === 'signup') {
+            delete formData.confirmPassword;
+        }
+        await new Promise(resolve => {
+            this.setState({isLoading: true}, resolve);
+        });
+        const [,responseJson] = await Promise.all([
+            new Promise(resolve => {
+                Animated.timing(this.buttonAnimated, {
+                    toValue: 1,
+                    duration: 200,
+                    easing: Easing.linear,
+                }).start(resolve);
+            }),
+            this._submitForm(this.props.submitUrl, formData),
+        ]);
+        if (responseJson) {
+            let loginResponse = responseJson;
             if (this.props.action === 'signup') {
-                delete formData.confirmPassword;
+                loginResponse = await this._submitForm(API.LOGIN, formData);
             }
-            await new Promise(resolve => {
-                this.setState({isLoading: true}, resolve);
-            });
-            const [,responseJson] = await Promise.all([
-                new Promise(resolve => {
-                    Animated.timing(this.buttonAnimated, {
-                        toValue: 1,
-                        duration: 200,
-                        easing: Easing.linear,
-                    }).start(resolve);
-                }),
-                this._submitForm(this.props.submitUrl, formData),
-            ]);
-            if (responseJson) {
-                let loginResponse = responseJson;
-                if (this.props.action === 'signup') {
-                    loginResponse = await this._submitForm(API.LOGIN, formData);
-                }
-                if (loginResponse) {
-                    await this._loginCallback(loginResponse);
-                }
+            if (loginResponse) {
+                await this._loginCallback(loginResponse);
             }
         }
     };
 
     _transformAPIMsg = (message) => {
-        const regex = /^Trường `([^`]+)` được yêu cầu$/;
-        const FIELD_MAP = {
-            username: 'tên đăng nhập',
-            password: 'mật khẩu'
+        const MESSAGE_MAP = {
+            'Trường `username` được yêu cầu': 'Vui lòng nhập tên đăng nhập',
+            'Trường `password` được yêu cầu': 'Vui lòng nhập mật khẩu',
+            'Sai username hoặc mật khẩu': 'Sai tên đăng nhập hoặc mật khẩu',
         };
-        if (regex.test(message)) {
-            const m = regex.exec(message);
-            const field = m[1];
-            if (FIELD_MAP.hasOwnProperty(field)) {
-                message = `Vui lòng nhập ${FIELD_MAP[field]}`;
-            }
+        if (MESSAGE_MAP.hasOwnProperty(message)) {
+            message = MESSAGE_MAP[message];
         }
         return message;
     };
@@ -86,11 +83,11 @@ export default class ButtonSubmit extends Component {
                 } else {
                     const message = this._transformAPIMsg(responseJson.message);
                     Toast.show(message);
-                    this._stopLoading().then();
+                    this._stopLoading().then(() => {});
                 }
             }).catch(() => {
                 Toast.show("Có lỗi xảy ra, vui lòng thử lại");
-                this._stopLoading().then();
+                this._stopLoading().then(() => {});
             });
         })
     };

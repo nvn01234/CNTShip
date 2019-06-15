@@ -25,7 +25,7 @@ export default class Form extends Component {
                 />
                 <PasswordInput
                     source={passwordImg}
-                    placeholder="Nhập lại mật khẩu"
+                    placeholder="Nhập lại mật khẩu mới"
                     returnKeyType={'done'}
                     autoCapitalize={'none'}
                     autoCorrect={false}

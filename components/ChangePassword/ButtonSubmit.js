@@ -17,6 +17,18 @@ export default class ButtonSubmit extends Component {
         this.buttonAnimated = new Animated.Value(0);
     }
 
+    _transformAPIMsg = (message) => {
+        const MESSAGE_MAP = {
+            'Trường `username` được yêu cầu': 'Có lỗi xảy ra, vui lòng thử lại',
+            'Trường `password` được yêu cầu': 'Vui lòng nhập mật khẩu cũ',
+            'Sai username hoặc mật khẩu': 'Mật khẩu cũ không chính xác',
+        };
+        if (MESSAGE_MAP.hasOwnProperty(message)) {
+            message = MESSAGE_MAP[message];
+        }
+        return message;
+    };
+
     _onPress = async() => {
         if (this.state.isLoading) return;
 
@@ -80,24 +92,26 @@ export default class ButtonSubmit extends Component {
                     ).then(responseJson => {
                         console.log(responseJson);
                         if (responseJson.success) {
-                            this._stopLoading().then(resolve);
-                            this.props.navigation.goBack();
-                            Toast.show('Đổi mật khẩu thành công');
+                            this._stopLoading().then(() => {
+                                this.props.navigation.goBack();
+                                Toast.show('Đổi mật khẩu thành công');
+                                resolve();
+                            });
                         } else {
                             Toast.show(responseJson.message);
-                            this._stopLoading().then();
+                            this._stopLoading().then(() => {});
                         }
                     }).catch(() => {
                         Toast.show('Có lỗi xảy ra, vui lòng thử lại');
-                        this._stopLoading().then();
+                        this._stopLoading().then(() => {});
                     });
                 } else {
-                    Toast.show(responseJson.message);
-                    this._stopLoading().then();
+                    Toast.show(this._transformAPIMsg(responseJson.message));
+                    this._stopLoading().then(() => {});
                 }
             }).catch(() => {
                 Toast.show('Có lỗi xảy ra, vui lòng thử lại');
-                this._stopLoading().then();
+                this._stopLoading().then(() => {});
             });
         });
     };
