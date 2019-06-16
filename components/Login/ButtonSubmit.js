@@ -18,7 +18,7 @@ export default class ButtonSubmit extends Component {
         this.buttonAnimated = new Animated.Value(0);
     }
 
-    _onPress = async () => {
+    _onPress = () => {
         if (this.state.isLoading) return;
 
         const formData = this.props.getFormData();
@@ -30,28 +30,23 @@ export default class ButtonSubmit extends Component {
         if (this.props.action === 'signup') {
             delete formData.confirmPassword;
         }
-        await new Promise(resolve => {
-            this.setState({isLoading: true}, resolve);
+        this.setState({isLoading: true}, () => {
+            Animated.timing(this.buttonAnimated, {
+                toValue: 1,
+                duration: 200,
+                easing: Easing.linear,
+            }).start(() => {
+                this._submitForm(this.props.submitUrl, formData).then((responseJson) => {
+                    if (this.props.action === 'signup') {
+                        this._submitForm(API.LOGIN, formData).then((loginResponse) => {
+                            this._loginCallback(loginResponse);
+                        });
+                    } else {
+                        this._loginCallback(responseJson);
+                    }
+                });
+            });
         });
-        const [,responseJson] = await Promise.all([
-            new Promise(resolve => {
-                Animated.timing(this.buttonAnimated, {
-                    toValue: 1,
-                    duration: 200,
-                    easing: Easing.linear,
-                }).start(resolve);
-            }),
-            this._submitForm(this.props.submitUrl, formData),
-        ]);
-        if (responseJson) {
-            let loginResponse = responseJson;
-            if (this.props.action === 'signup') {
-                loginResponse = await this._submitForm(API.LOGIN, formData);
-            }
-            if (loginResponse) {
-                await this._loginCallback(loginResponse);
-            }
-        }
     };
 
     _transformAPIMsg = (message) => {
@@ -92,13 +87,15 @@ export default class ButtonSubmit extends Component {
         })
     };
 
-    _loginCallback = async (responseJson) => {
-        await Promise.all([
+    _loginCallback = (responseJson) => {
+        Promise.all([
             AsyncStorage.setItem('access_token', responseJson.data.access_token),
             AsyncStorage.removeItem('user_profile'),
-        ]);
-        await this._stopLoading();
-        Actions.loggedInScreen({type: ActionConst.RESET});
+        ]).then(() => {
+            return this._stopLoading();
+        }).then(() => {
+            Actions.loggedInScreen({type: ActionConst.RESET});
+        });
     };
 
     _stopLoading = () => {

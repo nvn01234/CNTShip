@@ -26,24 +26,24 @@ export default class ButtonLogout extends Component {
         this.buttonAnimated = new Animated.Value(0);
     }
 
-    _onPress = async () => {
+    _onPress = () => {
         if (this.state.isLoading) return;
-        await new Promise(resolve => {
-            this.setState({isLoading: true}, resolve);
+        this.setState({isLoading: true}, () => {
+            Animated.timing(this.buttonAnimated, {
+                toValue: 1,
+                duration: 200,
+                easing: Easing.linear,
+            }).start(() => {
+                Promise.all([
+                    AsyncStorage.removeItem('access_token'),
+                    AsyncStorage.removeItem('user_profile')
+                ]).then(() => {
+                    return this._stopLoading();
+                }).then(() => {
+                    Actions.loginScreen({type: ActionConst.RESET});
+                })
+            });
         });
-        await Promise.all([
-            new Promise(resolve => {
-                Animated.timing(this.buttonAnimated, {
-                    toValue: 1,
-                    duration: 200,
-                    easing: Easing.linear,
-                }).start(resolve);
-            }),
-            AsyncStorage.removeItem('access_token'),
-            AsyncStorage.removeItem('user_profile')
-        ]);
-        await this._stopLoading();
-        Actions.loginScreen({type: ActionConst.RESET});
     };
 
     _stopLoading = () => {

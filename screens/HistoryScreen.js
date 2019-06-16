@@ -1,15 +1,14 @@
-import React from 'react'
-import {Animated, Platform, RefreshControl, ScrollView, StyleSheet, View, BackHandler} from 'react-native'
-import Order from '../components/Orders/Order'
-import ButtonAddOrder from '../components/Orders/ButtonAddOrder'
-import { NavigationEvents } from "react-navigation";
+import React from 'react';
+import {Animated, Platform, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
+import Order from "../components/Orders/Order";
 
-export default class OrdersScreen extends React.Component {
+function timestamp() {
+    return new Date().toLocaleDateString();
+}
+
+export default class HistoryScreen extends React.Component {
     static navigationOptions = {
-        title: 'Đơn online',
-        headerRight: (
-            <ButtonAddOrder/>
-        ),
+        title: 'Lịch sử giao nhận',
     };
 
     constructor(props) {
@@ -33,10 +32,10 @@ export default class OrdersScreen extends React.Component {
                 key: nextKey,
                 address: 'Số nhà 23 ngõ 165 phố yên duyên yên sở hoàng mai hà nội - Hoàng Mai - Hà Nội',
                 amount: '290(Thu hộ)|18(Shop trả)',
-                statusText: 'Đã nhận',
+                timestamp: timestamp(),
             }];
             this.setState({children: newChildren}, () => {
-                this.setState({loadMore: false});
+                this.setState({loadMore: false})
             });
         });
     };
@@ -47,30 +46,13 @@ export default class OrdersScreen extends React.Component {
             contentSize.height - paddingToBottom
     };
 
-    handleWillFocus = () => {
-        this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
-    };
-
-    handleWillBlur = () => {
-        this.backHandler.remove();
-    };
-
-    handleBackPress = () => {
-        BackHandler.exitApp();
-        return true;
-    };
-
     render() {
         return (
             <View style={styles.container}>
-                <NavigationEvents
-                    onWillFocus={this.handleWillFocus}
-                    onWillBlur={this.handleWillBlur}
-                />
                 <ScrollView
                     scrollEventThrottle={16}
                     onScroll={Animated.event(
-                        [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
+                        [{nativeEvent: {contentOffset: {y: this.state.scrollY}}}],
                         Platform.OS === 'android' ? {
                             listener: event => {
                                 if (this.isCloseToBottom(event.nativeEvent)) {
@@ -94,14 +76,12 @@ export default class OrdersScreen extends React.Component {
                         />
                     }
                 >
-                    {this.state.children.map((child) => {
-                        return (<Order
-                            key={child.key}
-                            order={child}
-                            orderProps={['address', 'amount', 'statusText']}
-                            navigation={this.props.navigation}
-                        />)
-                    })}
+                    {this.state.children.map((child) => (<Order
+                        key={child.key}
+                        order={child}
+                        orderProps={['address', 'amount', 'timestamp']}
+                        navigation={this.props.navigation}
+                    />))}
                 </ScrollView>
             </View>
         );
@@ -115,61 +95,61 @@ export default class OrdersScreen extends React.Component {
                         key: 1,
                         address: 'Số nhà 23 ngõ 165 phố yên duyên yên sở hoàng mai hà nội - Hoàng Mai - Hà Nội',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 2,
                         address: '385 trần đại nghĩa',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 3,
                         address: 'số 7 đinh tiên hoàng, hoàn kiếm, hà nội',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 4,
                         address: '43 Tràng Thi, Hoàn Kiếm, Hà Nội',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 5,
                         address: 'test',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 6,
                         address: 'test',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 7,
                         address: 'test',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 8,
                         address: 'test',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 9,
                         address: 'test',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                     {
                         key: 10,
                         address: 'test',
                         amount: '290(Thu hộ)|18(Shop trả)',
-                        statusText: 'Đã nhận',
+                        timestamp: timestamp(),
                     },
                 ]
             }, () => {

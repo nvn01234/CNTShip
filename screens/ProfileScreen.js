@@ -21,7 +21,7 @@ export default class ProfileScreen extends React.Component {
         };
     }
 
-    componentWillMount() {
+    componentDidMount() {
         AsyncStorage.getItem('user_profile').then(user_profile => {
             if (user_profile === null) {
                 this._onRefresh();

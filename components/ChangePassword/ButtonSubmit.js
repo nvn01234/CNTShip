@@ -29,7 +29,7 @@ export default class ButtonSubmit extends Component {
         return message;
     };
 
-    _onPress = async() => {
+    _onPress = () => {
         if (this.state.isLoading) return;
 
         const {oldPassword, password, confirmPassword} = this.props.getFormData();
@@ -49,76 +49,70 @@ export default class ButtonSubmit extends Component {
             return;
         }
 
-        await new Promise((resolve) => {
-            this.setState({isLoading: true}, resolve);
-        });
-        const [, user_profile] = await Promise.all([
-            new Promise((resolve) => {
-                Animated.timing(this.buttonAnimated, {
-                    toValue: 1,
-                    duration: 200,
-                    easing: Easing.linear,
-                }).start(resolve);
-            }),
-            AsyncStorage.getItem('user_profile')
-        ]);
-
-        const {username} = JSON.parse(user_profile);
-        // Check mật khẩu cũ bằng cách đăng nhập
-        await new Promise((resolve) => {
-            fetch(API_URL.LOGIN, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({username, password: oldPassword})
-            }).then(
-                response => response.json()
-            ).then(responseJson => {
-                console.log(responseJson);
-                if (responseJson.success) {
-                    // Đổi mật khẩu
-                    fetch(API_URL.CHANGE_PWD, {
+        this.setState({isLoading: true}, () => {
+            Animated.timing(this.buttonAnimated, {
+                toValue: 1,
+                duration: 200,
+                easing: Easing.linear,
+            }).start(() => {
+                AsyncStorage.getItem('user_profile').then((user_profile) => {
+                    const {username} = JSON.parse(user_profile);
+                    fetch(API_URL.LOGIN, {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'access-token': responseJson.data.access_token,
+                            'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({password}),
+                        body: JSON.stringify({username, password: oldPassword})
                     }).then(
                         response => response.json()
                     ).then(responseJson => {
                         console.log(responseJson);
                         if (responseJson.success) {
-                            this._stopLoading().then(() => {
-                                this.props.navigation.goBack();
-                                Toast.show('Đổi mật khẩu thành công');
-                                resolve();
+                            // Đổi mật khẩu
+                            fetch(API_URL.CHANGE_PWD, {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'access-token': responseJson.data.access_token,
+                                },
+                                body: JSON.stringify({password}),
+                            }).then(
+                                response => response.json()
+                            ).then(responseJson => {
+                                console.log(responseJson);
+                                if (responseJson.success) {
+                                    this._stopLoading().then(() => {
+                                        this.props.navigation.goBack();
+                                        Toast.show('Đổi mật khẩu thành công');
+                                    });
+                                } else {
+                                    Toast.show(responseJson.message);
+                                    this._stopLoading().then(() => {});
+                                }
+                            }).catch(() => {
+                                Toast.show('Có lỗi xảy ra, vui lòng thử lại');
+                                this._stopLoading().then(() => {});
                             });
                         } else {
-                            Toast.show(responseJson.message);
+                            Toast.show(this._transformAPIMsg(responseJson.message));
                             this._stopLoading().then(() => {});
                         }
                     }).catch(() => {
                         Toast.show('Có lỗi xảy ra, vui lòng thử lại');
                         this._stopLoading().then(() => {});
                     });
-                } else {
-                    Toast.show(this._transformAPIMsg(responseJson.message));
-                    this._stopLoading().then(() => {});
-                }
-            }).catch(() => {
-                Toast.show('Có lỗi xảy ra, vui lòng thử lại');
-                this._stopLoading().then(() => {});
+                })
             });
         });
     };
 
     _stopLoading() {
-        this.setState({isLoading: false});
-        this.buttonAnimated.setValue(0);
+        return new Promise((resolve) => {
+            this.buttonAnimated.setValue(0);
+            this.setState({isLoading: false}, resolve);
+        });
     }
 
     render() {
