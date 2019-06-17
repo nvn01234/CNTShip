@@ -1,44 +1,8 @@
 import React from 'react'
 import {StyleSheet, TouchableOpacity} from 'react-native'
 import {Card} from 'react-native-elements'
+import {NavigationActions} from 'react-navigation'
 import OrderProperty from './OrderProperty'
-
-export default class Order extends React.Component {
-    render() {
-        const PROPS_MAP = {
-            address: {
-                iconName: 'map-marker',
-                iconColor: '#E74C3C',
-                textStyle: styles.address,
-            },
-            amount: {
-                iconName: 'dollar',
-                iconColor: 'green',
-            },
-            statusText: {
-                iconName: 'bicycle',
-                iconColor: 'blue',
-                textStyle: styles.statusText,
-            },
-            timestamp: {
-                iconName: 'check',
-                iconColor: 'blue',
-            }
-        };
-
-        return (
-            <TouchableOpacity onPress={() => {this.props.navigation.navigate('OrderDetail')}}>
-                <Card style={styles.container}>
-                    {this.props.orderProps.map((prop) => (<OrderProperty
-                        key={prop}
-                        {...PROPS_MAP[prop]}
-                        value={this.props.order[prop]}
-                    />))}
-                </Card>
-            </TouchableOpacity>
-        )
-    }
-}
 
 const styles = StyleSheet.create({
     container: {
@@ -47,7 +11,48 @@ const styles = StyleSheet.create({
     address: {
         fontWeight: 'bold',
     },
-    statusText: {
+    status: {
         color: 'blue',
     }
 });
+
+const PROPS_MAP = {
+    itemAddress: {
+        iconName: 'map-marker',
+        iconColor: '#E74C3C',
+        textStyle: styles.address,
+    },
+    itemAmount: {
+        iconName: 'dollar',
+        iconColor: 'green',
+    },
+    itemStatus: {
+        iconName: 'bicycle',
+        iconColor: 'blue',
+        textStyle: styles.status,
+    },
+    itemTimestamp: {
+        iconName: 'check',
+        iconColor: 'blue',
+    }
+};
+
+export default class Order extends React.PureComponent {
+    render() {
+        return (
+            <TouchableOpacity onPress={this.props.gotoOrderDetailScreen}>
+                <Card style={styles.container}>
+                    {this._renderProps()}
+                </Card>
+            </TouchableOpacity>
+        )
+    }
+
+    _renderProps = () => Object.keys(this.props).filter(key => key.startsWith('item')).map(this._mapOrderProp);
+
+    _mapOrderProp = (key) => <OrderProperty
+        key={key}
+        {...PROPS_MAP[key]}
+        value={this.props[key]}
+    />;
+}

@@ -2,7 +2,7 @@ import React from 'react'
 import {Icon} from "react-native-elements";
 import {StyleSheet, Text, View} from "react-native";
 
-export default class OrderProperty extends React.Component {
+export default class OrderProperty extends React.PureComponent {
     render() {
         return (
             <View style={styles.container}>

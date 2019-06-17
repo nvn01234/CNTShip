@@ -64,4 +64,7 @@ export default createBottomTabNavigator({
   OrdersStack,
   HistoryStack,
   ProfileStack,
+}, {
+  resetOnBlur: true,
+  backBehavior: 'order',
 });
