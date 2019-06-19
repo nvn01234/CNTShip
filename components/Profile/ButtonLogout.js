@@ -10,7 +10,6 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import {ActionConst, Actions} from 'react-native-router-flux';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const MARGIN = 40;
@@ -40,7 +39,7 @@ export default class ButtonLogout extends Component {
                 ]).then(() => {
                     return this._stopLoading();
                 }).then(() => {
-                    Actions.loginScreen({type: ActionConst.RESET});
+                    this.props.navigateToLogin();
                 })
             });
         });

@@ -1,7 +1,6 @@
 import React from 'react';
 import {AsyncStorage, RefreshControl, ScrollView, StyleSheet} from 'react-native';
 import Toast from "react-native-simple-toast";
-import {Actions} from 'react-native-router-flux';
 import API from '../constants/API';
 import ButtonLogout from '../components/Profile/ButtonLogout';
 import {ListItem} from 'react-native-elements';
@@ -35,7 +34,7 @@ export default class ProfileScreen extends React.Component {
         this.setState({refreshing: true});
         AsyncStorage.getItem('access_token').then(access_token => {
             if (access_token === null) {
-                Actions.loginScreen();
+                this.props.navigation.navigate('Login');
             } else {
                 fetch(API.USER_PROFILE + '?fields=', {
                     method: 'GET',
@@ -90,9 +89,13 @@ export default class ProfileScreen extends React.Component {
                     containerStyle={styles.listItemContainer}
                     rightIcon={<Chevron/>}
                 />
-                <ButtonLogout/>
+                <ButtonLogout navigateToLogin={this.navigateToLogin}/>
             </ScrollView>
         );
+    }
+
+    navigateToLogin = () => {
+        this.props.navigation.navigate('Login');
     }
 }
 

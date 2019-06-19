@@ -1,7 +1,6 @@
 import React from 'react'
 import {StyleSheet, TouchableOpacity} from 'react-native'
 import {Card} from 'react-native-elements'
-import {NavigationActions} from 'react-navigation'
 import OrderProperty from './OrderProperty'
 
 const styles = StyleSheet.create({

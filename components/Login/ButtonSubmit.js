@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {ActivityIndicator, Animated, Dimensions, Easing, StyleSheet, Text, TouchableOpacity, View, AsyncStorage} from 'react-native';
-import {Actions, ActionConst} from 'react-native-router-flux';
 import API from '../../constants/API';
 import Toast from 'react-native-simple-toast';
 
@@ -94,7 +93,7 @@ export default class ButtonSubmit extends Component {
         ]).then(() => {
             return this._stopLoading();
         }).then(() => {
-            Actions.loggedInScreen({type: ActionConst.RESET});
+            this.props.navigateToMain();
         });
     };
 

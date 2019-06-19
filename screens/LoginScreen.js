@@ -43,10 +43,15 @@ export default class LoginScreen extends React.Component {
                 <ButtonSubmit getFormData={this.getFormData}
                               submitUrl={this.state.submitUrl}
                               submitText={this.state.submitText}
-                              action={this.state.current}/>
+                              action={this.state.current}
+                              navigateToMain={this.navigateToMain}/>
             </View>
         );
     }
+
+    navigateToMain = () => {
+        this.props.navigation.navigate('Main')
+    };
 
     onUsernameChange = (username) => {
         this.setState({username})
