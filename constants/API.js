@@ -7,4 +7,5 @@ export default {
     LOGOUT: API_ROOT + 'account/logout',
     USER_PROFILE: API_ROOT + 'users/me',
     CHANGE_PWD: API_ROOT + 'account/changePassword',
+    ORDER_LIST: API_ROOT + 'orders',
 }

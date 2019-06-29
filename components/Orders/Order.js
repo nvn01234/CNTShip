@@ -7,33 +7,36 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    address: {
-        fontWeight: 'bold',
-    },
     status: {
         color: 'blue',
-    }
+    },
+    customer: {
+        fontWeight: 'bold',
+    },
 });
 
 const PROPS_MAP = {
+    itemCustomer: {
+        iconName: 'user',
+        textStyle: styles.customer,
+    },
     itemAddress: {
         iconName: 'map-marker',
         iconColor: '#E74C3C',
-        textStyle: styles.address,
     },
     itemAmount: {
         iconName: 'dollar',
         iconColor: 'green',
     },
     itemStatus: {
-        iconName: 'bicycle',
+        iconName: 'info',
         iconColor: 'blue',
         textStyle: styles.status,
     },
     itemTimestamp: {
         iconName: 'check',
         iconColor: 'blue',
-    }
+    },
 };
 
 export default class Order extends React.PureComponent {
