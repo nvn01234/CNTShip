@@ -43,7 +43,6 @@ export default class ProfileScreen extends React.Component {
                     },
                 }).then(response => response.json())
                     .then(responseJson => {
-                        console.log(responseJson);
                         if (responseJson.success) {
                             AsyncStorage.setItem('user_profile', JSON.stringify(responseJson.data)).then(() => {
                                 this.setState({user_profile: responseJson.data, refreshing: false});
@@ -81,12 +80,6 @@ export default class ProfileScreen extends React.Component {
                     title={this.state.user_profile ? '**********' : ''}
                     containerStyle={styles.listItemContainer}
                     onPress={() => {this.props.navigation.navigate('ChangePassword')}}
-                    rightIcon={<Chevron/>}
-                />
-                <InfoText text="Giới tính"/>
-                <ListItem
-                    title={this.state.user_profile ? this.state.user_profile.sex : ''}
-                    containerStyle={styles.listItemContainer}
                     rightIcon={<Chevron/>}
                 />
                 <ButtonLogout navigateToLogin={this.navigateToLogin}/>

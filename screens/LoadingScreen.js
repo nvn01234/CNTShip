@@ -11,7 +11,7 @@ export default class LoadingScreen extends React.Component {
 
     componentDidMount() {
         AsyncStorage.getItem('access_token').then(token => {
-            console.log(`token: token`);
+            console.log(`token: ${token}`);
             this.setState({ hasToken: token !== null });
         });
     }

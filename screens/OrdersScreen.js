@@ -95,7 +95,6 @@ export default class OrdersScreen extends React.Component {
                 }).then(
                     response => response.json()
                 ).then(responseJson => {
-                    console.log(responseJson);
                     if (responseJson.success) {
                         return Promise.all([
                             new Promise(resolve => {

@@ -1,6 +1,12 @@
 import React from 'react';
-import {FlatList, RefreshControl, StyleSheet, View} from 'react-native';
+import {AsyncStorage, FlatList, RefreshControl, StyleSheet, View} from 'react-native';
 import Order from "../components/Orders/Order";
+import API from "../constants/API";
+import Toast from "react-native-simple-toast";
+import utils from "../utils";
+import PaymentTypes from "../constants/PaymentTypes";
+import ShipFeeTypes from "../constants/ShipFeeTypes";
+import TotalText from "../components/TotalText";
 
 export default class HistoryScreen extends React.Component {
     static navigationOptions = {
@@ -11,9 +17,13 @@ export default class HistoryScreen extends React.Component {
         super(props);
 
         this.state = {
+            page: 1,
+            hasMore: true,
             refreshing: false,
             loadMore: false,
-            children: [],
+            children: [null],
+            tien_da_nhan: 0,
+            tien_cho_nhan: 0,
         }
     }
 
@@ -21,23 +31,56 @@ export default class HistoryScreen extends React.Component {
         if (this.state.loadMore) {
             return;
         }
-        this.setState({loadMore: true}, () => {
-            const nextKey = this.state.children.length + 1;
-            const newChildren = [...this.state.children, {
-                key: nextKey,
-                address: 'Số nhà 23 ngõ 165 phố yên duyên yên sở hoàng mai hà nội - Hoàng Mai - Hà Nội',
-                amount: '290(Thu hộ)|18(Shop trả)',
-                timestamp: '18/06/2019 12:57 AM',
-            }];
-            this.setState({children: newChildren}, () => {
-                this.setState({loadMore: false})
-            });
+        if (!this.state.hasMore) {
+            return;
+        }
+        this.setState({page: this.state.page + 1, loadMore: true}, () => {
+            this._getCurrentPage().then(() => {
+                this.setState({loadMore: false});
+            })
+        });
+    };
+
+    _getCurrentPage = () => {
+        return AsyncStorage.getItem('access_token').then(access_token => {
+            if (access_token === null) {
+                this.props.navigation.navigate('Login');
+            } else {
+                return fetch(`${API.ORDER_LIST}?q=status:delivered&page=${this.state.page}&per_page=10`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'access-token': access_token,
+                    },
+                }).then(
+                    response => response.json()
+                ).then(responseJson => {
+                    if (responseJson.success) {
+                        return Promise.all([
+                            new Promise(resolve => {
+                                const newChild = this.state.refreshing ? [null, ...responseJson.data] : [...this.state.children, ...responseJson.data];
+                                this.setState({children: newChild}, resolve);
+                            }),
+                            new Promise(resolve => {
+                                this.setState({hasMore: responseJson.paging.page < responseJson.paging.total_page}, resolve);
+                            }),
+                        ]);
+                    } else {
+                        Toast.show(responseJson.message);
+                        return Promise.reject();
+                    }
+                }).catch(() => {
+                    Toast.show("Có lỗi xảy ra, vui lòng thử lại");
+                    return Promise.reject();
+                });
+            }
         });
     };
 
     render() {
         return (
             <View style={styles.container}>
+
                 <FlatList
                     onEndReached={this.loadMoreData}
                     onEndReachedThreshold={0.4}
@@ -51,89 +94,40 @@ export default class HistoryScreen extends React.Component {
                     }
                     data={this.state.children}
                     renderItem={this._renderItem}
+                    keyExtractor={this._keyExtractor}
                 />
             </View>
         );
     }
 
-    _renderItem = ({item}) => <Order
-        key={item.key.toString()}
-        itemAddress={item.address}
-        itemAmount={item.amount}
-        itemTimestamp={item.timestamp}
-        gotoOrderDetailScreen={this.gotoOrderDetailScreen}
-    />;
+    _keyExtractor = (item, index) => {
+        return item === null ? 'null' : item._id;
+    };
+
+    _renderItem = ({item}) => {
+        if (item === null) {
+            return <View style={styles.totalContainer}>
+                <TotalText text="Tiền đã nhận" value={this.state.tien_da_nhan}/>
+                <TotalText text="Tiền chờ nhận" value={this.state.tien_cho_nhan}/>
+            </View>
+        } else {
+            return <Order
+                itemCustomer={`${item.customer_name} (${item.customer_phone})`}
+                itemAddress={item.customer_address}
+                itemAmount={`${utils.formatNumber(item.total)} (${PaymentTypes[item.payment_type]}) | ${utils.formatNumber(item.ship_fee)} (${ShipFeeTypes[item.ship_fee_type]})`}
+                itemTimestamp={item.delivered_at}
+                gotoOrderDetailScreen={this.gotoOrderDetailScreen}
+            />
+        }
+    };
 
     gotoOrderDetailScreen = () => {
         this.props.navigation.navigate('OrderDetail');
     };
 
     _onRefresh = () => {
-        this.setState({refreshing: true}, () => {
-            this.setState({
-                children: [
-                    {
-                        key: 1,
-                        address: 'Số nhà 23 ngõ 165 phố yên duyên yên sở hoàng mai hà nội - Hoàng Mai - Hà Nội',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 2,
-                        address: '385 trần đại nghĩa',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 3,
-                        address: 'số 7 đinh tiên hoàng, hoàn kiếm, hà nội',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 4,
-                        address: '43 Tràng Thi, Hoàn Kiếm, Hà Nội',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 5,
-                        address: 'test',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 6,
-                        address: 'test',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 7,
-                        address: 'test',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 8,
-                        address: 'test',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 9,
-                        address: 'test',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                    {
-                        key: 10,
-                        address: 'test',
-                        amount: '290(Thu hộ)|18(Shop trả)',
-                        timestamp: '18/06/2019 12:57 AM',
-                    },
-                ]
-            }, () => {
+        this.setState({refreshing: true, page: 1, hasMore: true}, () => {
+            this._getCurrentPage().then(() => {
                 this.setState({refreshing: false});
             });
         });
@@ -159,5 +153,8 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingBottom: 15,
+    },
+    totalContainer: {
+        marginTop: 20,
     },
 });
