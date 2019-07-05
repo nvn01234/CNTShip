@@ -1,21 +1,28 @@
 import React from 'react'
-import {FlatList, RefreshControl, StyleSheet, View, AsyncStorage} from 'react-native'
+import {FlatList, RefreshControl, StyleSheet, View, AsyncStorage, TouchableOpacity} from 'react-native'
 import Order from '../components/Orders/Order'
-import ButtonAddOrder from '../components/Orders/ButtonAddOrder'
 import API from '../constants/API'
 import Toast from "react-native-simple-toast"
 import OrderStatuses from '../constants/OrderStatuses'
 import PaymentTypes from '../constants/PaymentTypes'
 import ShipFeeTypes from '../constants/ShipFeeTypes'
 import utils from '../utils'
+import {Icon} from "react-native-elements"
 
 export default class OrdersScreen extends React.Component {
-    static navigationOptions = {
+    static navigationOptions = ({navigation}) => ({
         title: 'Đơn online',
         headerRight: (
-            <ButtonAddOrder/>
+            <TouchableOpacity  onPress={() => {navigation.navigate('CreateOrder')}} style={styles.buttonAddOrder}>
+                <Icon
+                    type='font-awesome'
+                    name="plus-circle"
+                    size={30}
+                    color='#0F8FCC'
+                />
+            </TouchableOpacity>
         ),
-    };
+    });
 
     constructor(props) {
         super(props);
@@ -86,7 +93,7 @@ export default class OrdersScreen extends React.Component {
             if (access_token === null) {
                 this.props.navigation.navigate('Login');
             } else {
-                return fetch(`${API.ORDER_LIST}?page=${this.state.page}&per_page=10`, {
+                return fetch(`${API.ORDER_LIST}?page=${this.state.page}&per_page=10&sort=created_at:desc`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -146,4 +153,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingBottom: 15,
     },
+    buttonAddOrder: {
+        marginRight: 16,
+    }
 });

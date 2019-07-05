@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {ActivityIndicator, Animated, Dimensions, Easing, StyleSheet, Text, TouchableOpacity, View, AsyncStorage} from 'react-native';
-import API from '../../constants/API';
 import Toast from 'react-native-simple-toast';
+import services from '@services'
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const MARGIN = 40;
@@ -16,6 +16,15 @@ export default class ButtonSubmit extends Component {
 
         this.buttonAnimated = new Animated.Value(0);
     }
+
+    _getServiceFromAction = () => {
+        switch (this.props.action) {
+            case 'login': return services.login;
+            case 'signup': return services.register;
+            case 'resetpwd': return services.resetPassword;
+            default: return null;
+        }
+    };
 
     _onPress = () => {
         if (this.state.isLoading) return;
@@ -35,17 +44,23 @@ export default class ButtonSubmit extends Component {
                 duration: 200,
                 easing: Easing.linear,
             }).start(() => {
-                this._submitForm(this.props.submitUrl, formData).then((responseJson) => {
+                const service = this._getServiceFromAction();
+                service(formData).then((data) => {
                     if (this.props.action === 'signup') {
-                        this._submitForm(API.LOGIN, formData).then((loginResponse) => {
-                            this._loginCallback(loginResponse);
-                        });
+                        services.login(formData).then((loginData) => {
+                            this._loginCallback(loginData);
+                        }).catch(this._errorHandler);
                     } else {
-                        this._loginCallback(responseJson);
+                        this._loginCallback(data);
                     }
-                });
+                }).catch(this._errorHandler);
             });
         });
+    };
+
+    _errorHandler = (message) => {
+        Toast.show(message);
+        return this._stopLoading();
     };
 
     _transformAPIMsg = (message) => {
@@ -60,7 +75,7 @@ export default class ButtonSubmit extends Component {
         return message;
     };
 
-    _submitForm = (url, formData) => {
+    _submitForm = (service, formData) => {
         return new Promise((resolve) => {
             fetch(url, {
                 method: 'POST',
@@ -86,9 +101,9 @@ export default class ButtonSubmit extends Component {
         })
     };
 
-    _loginCallback = (responseJson) => {
+    _loginCallback = ({access_token}) => {
         Promise.all([
-            AsyncStorage.setItem('access_token', responseJson.data.access_token),
+            AsyncStorage.setItem('access_token', access_token),
             AsyncStorage.removeItem('user_profile'),
         ]).then(() => {
             return this._stopLoading();

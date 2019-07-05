@@ -5,8 +5,6 @@ import Form from '../components/Login/Form';
 import BottomSection from '../components/Login/BottomSection';
 import ButtonSubmit from '../components/Login/ButtonSubmit';
 
-import APIs from '../constants/API';
-
 export default class LoginScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -20,7 +18,6 @@ export default class LoginScreen extends React.Component {
             leftText: 'Đăng ký',
             rightText: 'Quên mật khẩu?',
             submitText: 'Đăng nhập',
-            submitUrl: APIs.LOGIN,
             showPasswordInput: true,
             showConfirmPasswordInput: false,
         };
@@ -41,7 +38,6 @@ export default class LoginScreen extends React.Component {
                                rightText={this.state.rightText}
                                action={this.state.current}/>
                 <ButtonSubmit getFormData={this.getFormData}
-                              submitUrl={this.state.submitUrl}
                               submitText={this.state.submitText}
                               action={this.state.current}
                               navigateToMain={this.navigateToMain}/>
@@ -80,7 +76,6 @@ export default class LoginScreen extends React.Component {
                 leftText: 'Đăng nhập',
                 rightText: 'Quên mật khẩu?',
                 submitText: 'Đăng ký',
-                submitUrl: APIs.SIGNUP,
                 showPasswordInput: true,
                 showConfirmPasswordInput: true,
             })
@@ -90,7 +85,6 @@ export default class LoginScreen extends React.Component {
                 leftText: 'Đăng ký',
                 rightText: 'Quên mật khẩu?',
                 submitText: 'Đăng nhập',
-                submitUrl: APIs.LOGIN,
                 showPasswordInput: true,
                 showConfirmPasswordInput: false,
             })
@@ -104,7 +98,6 @@ export default class LoginScreen extends React.Component {
                 leftText: 'Đăng ký',
                 rightText: 'Đăng nhập',
                 submitText: 'Quên mật khẩu',
-                submitUrl: APIs.RESETPWD,
                 showPasswordInput: false,
                 showConfirmPasswordInput: false,
             })
@@ -114,7 +107,6 @@ export default class LoginScreen extends React.Component {
                 leftText: 'Đăng ký',
                 rightText: 'Quên mật khẩu?',
                 submitText: 'Đăng nhập',
-                submitUrl: APIs.LOGIN,
                 showPasswordInput: true,
                 showConfirmPasswordInput: false,
             })

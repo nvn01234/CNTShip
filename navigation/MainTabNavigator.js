@@ -8,10 +8,12 @@ import ProfileScreen from '../screens/ProfileScreen'
 import ChangePasswordScreen from "../screens/ChangePasswordScreen"
 import OrderDetailScreen from '../screens/OrderDetailScreen'
 import {fromRight} from 'react-navigation-transitions'
+import CreateOrderScreen from "../screens/CreateOrderScreen";
 
 const OrdersStack = createStackNavigator({
   Orders: OrdersScreen,
   OrderDetail: OrderDetailScreen,
+  CreateOrder: CreateOrderScreen,
 }, {
   transitionConfig: () => fromRight()
 });

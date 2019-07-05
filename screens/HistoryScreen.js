@@ -46,7 +46,7 @@ export default class HistoryScreen extends React.Component {
             if (access_token === null) {
                 this.props.navigation.navigate('Login');
             } else {
-                return fetch(`${API.ORDER_LIST}?q=status:delivered&page=${this.state.page}&per_page=10`, {
+                return fetch(`${API.ORDER_LIST}?q=status:delivered&page=${this.state.page}&per_page=10&sort=created_at:desc`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
