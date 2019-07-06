@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Dimensions, Image, StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
-import eyeImg from "../../assets/images/eye_black.png";
+import eyeImg from "@assets/images/eye_black.png";
+import passwordImg from '@assets/images/password.png';
 
 export default class PasswordInput extends Component {
     constructor(props) {
@@ -16,15 +17,15 @@ export default class PasswordInput extends Component {
 
     render() {
         return (
-            <View style={styles.inputWrapper}>
-                <Image source={this.props.source} style={styles.inlineImg}/>
+            <View style={this.props.inputWrapperStyle}>
+                <Image source={passwordImg} style={styles.inlineImg}/>
                 <TextInput
                     style={styles.input}
                     placeholder={this.props.placeholder}
                     secureTextEntry={this.state.secureTextEntry}
-                    autoCorrect={this.props.autoCorrect}
-                    autoCapitalize={this.props.autoCapitalize}
-                    returnKeyType={this.props.returnKeyType}
+                    returnKeyType={'done'}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
                     placeholderTextColor="white"
                     underlineColorAndroid="transparent"
                     onChangeText={this.props.onChangeText}
@@ -52,9 +53,6 @@ const styles = StyleSheet.create({
         paddingLeft: 45,
         borderRadius: 20,
         color: '#ffffff',
-    },
-    inputWrapper: {
-        flex: 1,
     },
     inlineImg: {
         position: 'absolute',

@@ -2,7 +2,7 @@ import React from 'react';
 import {AsyncStorage, RefreshControl, ScrollView, StyleSheet} from 'react-native';
 import Toast from "react-native-simple-toast";
 import API from '../constants/API';
-import ButtonLogout from '../components/Profile/ButtonLogout';
+import ButtonSubmit from '@components/ButtonSubmit';
 import {ListItem} from 'react-native-elements';
 import InfoText from '../components/Profile/InfoText';
 import Chevron from '../components/Profile/Chevron';
@@ -82,13 +82,20 @@ export default class ProfileScreen extends React.Component {
                     onPress={() => {this.props.navigation.navigate('ChangePassword')}}
                     rightIcon={<Chevron/>}
                 />
-                <ButtonLogout navigateToLogin={this.navigateToLogin}/>
+                <ButtonSubmit style={styles.buttonLogout}
+                              text='Đăng xuất'
+                              onPress={this._logout}/>
             </ScrollView>
         );
     }
 
-    navigateToLogin = () => {
-        this.props.navigation.navigate('Login');
+    _logout = () => {
+        return Promise.all([
+            AsyncStorage.removeItem('access_token'),
+            AsyncStorage.removeItem('user_profile')
+        ]).then(() => {
+            this.props.navigation.navigate('Login');
+        })
     }
 }
 
@@ -102,4 +109,7 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: '#ECECEC',
     },
+    buttonLogout: {
+        marginTop: 17,
+    }
 });

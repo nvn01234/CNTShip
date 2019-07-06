@@ -3,4 +3,4 @@ export const headers = {
     'Content-Type': 'application/json'
 };
 
-export const exceptionHandler = () => Promise.reject("Có lỗi xảy ra. Vui lòng thử lại");
+export const handleException = (e) => Promise.reject("Có lỗi xảy ra. Vui lòng thử lại");

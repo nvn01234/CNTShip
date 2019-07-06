@@ -1,25 +1,20 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
-import Logo from '../components/Login/Logo';
-import Form from '../components/Login/Form';
-import BottomSection from '../components/Login/BottomSection';
-import ButtonSubmit from '../components/Login/ButtonSubmit';
+import {AsyncStorage, StyleSheet, View} from 'react-native';
+import Toast from "react-native-simple-toast";
+import services from '@services'
+import {ACTION_TO_STATE, BUTTON_TEXTS} from '@constants/LoginButtons'
+import ButtonSubmit from '@components/ButtonSubmit';
+import {Logo, BottomSection, AuthForm} from '@components/LoginScreen';
+
 
 export default class LoginScreen extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            username: '',
-            password: '',
-            confirmPassword: '',
-
-            current: 'login',
-            leftText: 'Đăng ký',
-            rightText: 'Quên mật khẩu?',
-            submitText: 'Đăng nhập',
-            showPasswordInput: true,
-            showConfirmPasswordInput: false,
+            loginSuccess: false,
+            formData: {},
+            ...ACTION_TO_STATE.login,
         };
     }
 
@@ -27,90 +22,83 @@ export default class LoginScreen extends React.Component {
         return (
             <View style={styles.container}>
                 <Logo/>
-                <Form onUsernameChange={this.onUsernameChange}
-                      onPasswordChange={this.onPasswordChange}
-                      onConfirmPasswordChange={this.onConfirmPasswordChange}
-                      showPasswordInput={this.state.showPasswordInput}
-                      showConfirmPasswordInput={this.state.showConfirmPasswordInput}/>
-                <BottomSection leftAction={this.leftAction}
-                               rightAction={this.rightAction}
-                               leftText={this.state.leftText}
-                               rightText={this.state.rightText}
-                               action={this.state.current}/>
-                <ButtonSubmit getFormData={this.getFormData}
-                              submitText={this.state.submitText}
-                              action={this.state.current}
-                              navigateToMain={this.navigateToMain}/>
+                <AuthForm style={styles[`flex_${this.state.action}`]}
+                          onChange={this._onFormChange}
+                          showPasswordInput={this.state.showPasswordInput}
+                          showConfirmPasswordInput={this.state.showConfirmPasswordInput} />
+                <BottomSection style={styles[`flex_${this.state.action}`]}
+                               leftAction={this.state.leftAction}
+                               rightAction={this.state.rightAction}
+                               switchAction={this._switchAction}/>
+                <ButtonSubmit text={BUTTON_TEXTS[this.state.action]}
+                              validate={this._validateForm}
+                              onPress={this._submitForm}
+                              onComplete={this._formSubmitCompleted}
+                              style={styles[`btn_${this.state.action}`]}/>
             </View>
         );
     }
 
-    navigateToMain = () => {
-        this.props.navigation.navigate('Main')
+    _validateForm = () => {
+        const {username, password, confirmPassword} = this.state.formData;
+        if (!username) {
+            Toast.show('Vui lòng nhập tên đăng nhập');
+            return false;
+        }
+        if (this.state.showPasswordInput && !password) {
+            Toast.show('Vui lòng nhập mật khẩu');
+            return false;
+        }
+        if (this.state.showConfirmPasswordInput && (password !== confirmPassword)) {
+            Toast.show('Xác nhận mật khẩu không khớp');
+            return false;
+        }
+        return true;
     };
 
-    onUsernameChange = (username) => {
-        this.setState({username})
-    };
-
-    onPasswordChange = (password) => {
-        this.setState({password})
-    };
-
-    onConfirmPasswordChange = (confirmPassword) => {
-        this.setState({confirmPassword})
-    };
-
-    getFormData = () => {
-        return {
-            username: this.state.username,
-            ...(this.state.showPasswordInput ? {password: this.state.password} : {}),
-            ...(this.state.showConfirmPasswordInput ? {confirmPassword: this.state.confirmPassword}: {}),
+    _submitForm = async () => {
+        const service = services[this.state.action];
+        const formData = this.state.formData;
+        try {
+            const data = await service(formData);
+            if (this.state.action === 'register') {
+                const loginData = await services.login(formData);
+                await this._loginSuccess(loginData);
+            } else {
+                await this._loginSuccess(data);
+            }
+        } catch (message) {
+            this._errorHandler(message);
         }
     };
 
-    leftAction = () => {
-        if (this.state.current === 'login' || this.state.current === 'resetpwd') {
-            this.setState({
-                current: 'signup',
-                leftText: 'Đăng nhập',
-                rightText: 'Quên mật khẩu?',
-                submitText: 'Đăng ký',
-                showPasswordInput: true,
-                showConfirmPasswordInput: true,
-            })
-        } else if (this.state.current === 'signup') {
-            this.setState({
-                current: 'login',
-                leftText: 'Đăng ký',
-                rightText: 'Quên mật khẩu?',
-                submitText: 'Đăng nhập',
-                showPasswordInput: true,
-                showConfirmPasswordInput: false,
-            })
+    _formSubmitCompleted = () => {
+        if (this.state.loginSuccess) {
+            this.props.navigation.navigate('Main');
         }
     };
 
-    rightAction = () => {
-        if (this.state.current === 'login' || this.state.current === 'signup') {
-            this.setState({
-                current: 'resetpwd',
-                leftText: 'Đăng ký',
-                rightText: 'Đăng nhập',
-                submitText: 'Quên mật khẩu',
-                showPasswordInput: false,
-                showConfirmPasswordInput: false,
+    _loginSuccess = ({access_token}) => {
+        return Promise.all([
+            AsyncStorage.setItem('access_token', access_token),
+            AsyncStorage.removeItem('user_profile'),
+        ]).then(() => {
+            return new Promise((resolve) => {
+                this.setState({loginSuccess: true}, resolve);
             })
-        } else if (this.state.current === 'resetpwd') {
-            this.setState({
-                current: 'login',
-                leftText: 'Đăng ký',
-                rightText: 'Quên mật khẩu?',
-                submitText: 'Đăng nhập',
-                showPasswordInput: true,
-                showConfirmPasswordInput: false,
-            })
-        }
+        });
+    };
+
+    _errorHandler = (message) => {
+        Toast.show(message);
+    };
+
+    _onFormChange = (formData) => {
+        this.setState({formData})
+    };
+
+    _switchAction = (action) => {
+        this.setState(ACTION_TO_STATE[action]);
     };
 }
 
@@ -120,5 +108,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#0F8FCC',
+    },
+
+    btn_register: {
+        top: -135,
+    },
+    btn_login: {
+        top: -95,
+    },
+    btn_resetPassword: {
+        top: -95,
+    },
+
+    flex_register: {
+        flex: 2,
+    },
+    flex_login: {
+        flex: 1,
+    },
+    flex_resetPassword: {
+        flex: 1,
     },
 });

@@ -6,7 +6,11 @@
       {
         "root": ["./"],
         "alias": {
-          "@services": "./src/services"
+          "@services": "./services",
+          "@components": "./components",
+          "@assets": "./assets",
+          "@screens": "./screens",
+          "@constants": "./constants"
         }
       }
     ]

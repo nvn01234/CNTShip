@@ -1,17 +1,18 @@
 import React, {Component} from 'react';
 import {Dimensions, Image, StyleSheet, TextInput, View} from 'react-native';
+import usernameImg from '@assets/images/username.png';
 
 export default class UserInput extends Component {
     render() {
         return (
             <View style={styles.inputWrapper}>
-                <Image source={this.props.source} style={styles.inlineImg}/>
+                <Image source={usernameImg} style={styles.inlineImg}/>
                 <TextInput
                     style={styles.input}
-                    placeholder={this.props.placeholder}
-                    autoCorrect={this.props.autoCorrect}
-                    autoCapitalize={this.props.autoCapitalize}
-                    returnKeyType={this.props.returnKeyType}
+                    placeholder="Tên đăng nhập"
+                    returnKeyType={'done'}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
                     placeholderTextColor="white"
                     underlineColorAndroid="transparent"
                     onChangeText={this.props.onChangeText}
