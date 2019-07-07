@@ -1,7 +1,7 @@
 import React from 'react';
 import {Icon} from 'react-native-elements';
 
-import Colors from '../constants/Colors';
+import Colors from '@constants/Colors';
 
 export default class TabBarIcon extends React.PureComponent {
     render() {

@@ -1,6 +1,5 @@
 import React from 'react'
-import {StyleSheet} from 'react-native'
-import Form from '../Form'
+import {StyleSheet, KeyboardAvoidingView} from 'react-native'
 import PasswordInput from '../PasswordInput'
 
 export default class ChangePasswordForm extends React.Component {
@@ -14,7 +13,7 @@ export default class ChangePasswordForm extends React.Component {
 
     render() {
         return (
-            <Form style={styles.container}>
+            <KeyboardAvoidingView behavior="padding" style={styles.container}>
                 <PasswordInput placeholder='Mật khẩu cũ'
                                onChangeText={this._onChangeText('oldPassword')}
                                inputWrapperStyle={styles.inputWrapper}/>
@@ -24,7 +23,7 @@ export default class ChangePasswordForm extends React.Component {
                 <PasswordInput placeholder='Nhập lại mật khẩu mới'
                                onChangeText={this._onChangeText('confirmNewPassword')}
                                inputWrapperStyle={styles.inputWrapper}/>
-            </Form>
+            </KeyboardAvoidingView>
         )
     }
 
@@ -40,6 +39,7 @@ export default class ChangePasswordForm extends React.Component {
 const styles = StyleSheet.create({
     container: {
         marginBottom: 20,
+        alignItems: 'center',
     },
     inputWrapper: {
         marginTop: 20,

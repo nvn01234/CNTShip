@@ -1,7 +1,6 @@
 import React from 'react'
-import {StyleSheet, View, Text} from 'react-native'
-import { Input } from 'react-native-elements'
-import { TextInput } from 'react-native-paper'
+import {StyleSheet, View} from 'react-native'
+import {CreateOrderForm} from '@components/CreateOrderScreen'
 
 const styles = StyleSheet.create({
     container: {
@@ -17,12 +16,21 @@ export default class CreateOrderScreen extends React.Component {
         title: 'Tạo đơn',
     };
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            formData: {},
+        }
+    }
+
     render() {
         return (<View style={styles.container}>
-            <TextInput
-                label='Email'
-            />
+            <CreateOrderForm onChange={this._onFormChange}/>
         </View>)
+    };
+
+    _onFormChange = (formData) => {
+        this.setState({formData})
     };
 }
 

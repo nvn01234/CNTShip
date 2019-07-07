@@ -4,6 +4,7 @@ import {ChangePasswordForm} from '@components/ChangePasswordScreen'
 import ButtonSubmit from '@components/ButtonSubmit';
 import services from '@services';
 import Toast from "react-native-simple-toast";
+import Colors from '@constants/Colors'
 
 
 export default class ChangePasswordScreen extends React.Component {
@@ -87,6 +88,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        backgroundColor: '#0F8FCC',
+        backgroundColor: Colors.changePasswordBackground,
     },
 });

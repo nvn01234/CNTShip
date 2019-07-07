@@ -1,8 +1,7 @@
 import React from 'react'
-import Form from '../Form'
 import UsernameInput from '../UsernameInput'
 import PasswordInput from '../PasswordInput'
-import {StyleSheet} from 'react-native'
+import {KeyboardAvoidingView, StyleSheet} from 'react-native'
 
 export default class AuthForm extends React.Component {
     constructor(props) {
@@ -15,7 +14,7 @@ export default class AuthForm extends React.Component {
 
     render() {
         return (
-            <Form style={this.props.style}>
+            <KeyboardAvoidingView behavior="padding" style={[styles.container, this.props.style]}>
                 <UsernameInput onChangeText={this._onChangeText('username')}/>
                 {this.props.showPasswordInput && (
                     <PasswordInput placeholder='Mật khẩu'
@@ -27,7 +26,7 @@ export default class AuthForm extends React.Component {
                                    onChangeText={this._onChangeText('confirmPassword')}
                                    inputWrapperStyle={styles.inputWrapper}/>
                 )}
-            </Form>
+            </KeyboardAvoidingView>
         )
     }
 
@@ -49,6 +48,9 @@ export default class AuthForm extends React.Component {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        alignItems: 'center'
+    },
     inputWrapper: {
         flex: 1,
     }

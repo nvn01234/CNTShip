@@ -78,7 +78,8 @@ export default class ProfileScreen extends React.Component {
                 />
                 <ButtonSubmit style={styles.buttonLogout}
                               text='Đăng xuất'
-                              onPress={this._logout}/>
+                              onPress={this._logout}
+                              onComplete={this._gotoLoginScreen}/>
             </ScrollView>
         );
     }
@@ -87,9 +88,11 @@ export default class ProfileScreen extends React.Component {
         return Promise.all([
             AsyncStorage.removeItem('access_token'),
             AsyncStorage.removeItem('user_profile')
-        ]).then(() => {
-            this.props.navigation.navigate('Login');
-        })
+        ]);
+    };
+
+    _gotoLoginScreen = () => {
+        this.props.navigation.navigate('Login');
     }
 }
 

@@ -5,6 +5,7 @@ import services from '@services'
 import {ACTION_TO_STATE, BUTTON_TEXTS} from '@constants/LoginButtons'
 import ButtonSubmit from '@components/ButtonSubmit';
 import {Logo, BottomSection, AuthForm} from '@components/LoginScreen';
+import Colors from '@constants/Colors'
 
 
 export default class LoginScreen extends React.Component {
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#0F8FCC',
+        backgroundColor: Colors.loginBackground,
     },
 
     btn_register: {

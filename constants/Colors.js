@@ -1,14 +1,11 @@
-const tintColor = '#2f95dc';
+const primary = '#0F8FCC';
 
 export default {
-  tintColor,
+  primary,
+  loginBackground: primary,
+  changePasswordBackground: primary,
   tabIconDefault: '#ccc',
-  tabIconSelected: tintColor,
-  tabBar: '#fefefe',
-  errorBackground: 'red',
-  errorText: '#fff',
-  warningBackground: '#EAEB5E',
-  warningText: '#666804',
-  noticeBackground: tintColor,
-  noticeText: '#fff',
+  tabIconSelected: primary,
+  inputUnderline: primary,
+  inputSelection: primary,
 };
