@@ -1,5 +1,5 @@
 import endpoints from './_endpoints'
-import {headers, handleException} from './_helper'
+import {headers, headersWithToken, handleException} from './_helper'
 
 const authService = (endpoint) => async (data) => {
     try {
@@ -26,10 +26,7 @@ const changePassword = async ({username, oldPassword, newPassword}) => {
     try {
         const response = await fetch(endpoints.CHANGE_PASSWORD, {
             method: 'POST',
-            headers: {
-                ...headers,
-                'access-token': access_token,
-            },
+            headers: headersWithToken(access_token),
             body: JSON.stringify({password: newPassword})
         });
         const responseJson = await response.json();

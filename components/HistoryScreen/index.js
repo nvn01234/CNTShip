@@ -1,0 +1,1 @@
+export TotalText from './TotalText'

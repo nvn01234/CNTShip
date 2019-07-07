@@ -3,4 +3,12 @@ export const headers = {
     'Content-Type': 'application/json'
 };
 
-export const handleException = (e) => Promise.reject("Có lỗi xảy ra. Vui lòng thử lại");
+export const headersWithToken = (access_token) => ({
+    ...headers,
+    'access-token': access_token,
+});
+
+export const handleException = (e) => {
+    console.log(e);
+    return Promise.reject("Có lỗi xảy ra. Vui lòng thử lại")
+};

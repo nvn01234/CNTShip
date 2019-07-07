@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import utils from '../utils'
+import {formatNumber} from '@utils'
 
 const styles = StyleSheet.create({
     container: {
@@ -14,10 +14,10 @@ const styles = StyleSheet.create({
     },
 });
 
-export default class InfoText extends React.PureComponent {
+export default class TotalText extends React.PureComponent {
     render = () => (
         <View style={styles.container}>
-            <Text style={styles.infoText}>{this.props.text}: {utils.formatNumber(this.props.value)}</Text>
+            <Text style={styles.infoText}>{this.props.text}: {formatNumber(this.props.value)}</Text>
         </View>
     )
 }

@@ -42,7 +42,7 @@ const PROPS_MAP = {
 export default class Order extends React.PureComponent {
     render() {
         return (
-            <TouchableOpacity onPress={this.props.gotoOrderDetailScreen}>
+            <TouchableOpacity onPress={this.props.onPress}>
                 <Card style={styles.container}>
                     {this._renderProps()}
                 </Card>

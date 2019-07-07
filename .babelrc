@@ -10,7 +10,8 @@
           "@components": "./components",
           "@assets": "./assets",
           "@screens": "./screens",
-          "@constants": "./constants"
+          "@constants": "./constants",
+          "@utils": "./utils"
         }
       }
     ]

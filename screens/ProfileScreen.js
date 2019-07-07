@@ -1,11 +1,10 @@
 import React from 'react';
 import {AsyncStorage, RefreshControl, ScrollView, StyleSheet} from 'react-native';
 import Toast from "react-native-simple-toast";
-import API from '../constants/API';
 import ButtonSubmit from '@components/ButtonSubmit';
 import {ListItem} from 'react-native-elements';
-import InfoText from '../components/Profile/InfoText';
-import Chevron from '../components/Profile/Chevron';
+import {InfoText, Chevron} from '@components/ProfileScreen';
+import services from '@services'
 
 export default class ProfileScreen extends React.Component {
     static navigationOptions = {
@@ -31,32 +30,27 @@ export default class ProfileScreen extends React.Component {
     }
 
     _onRefresh = () => {
-        this.setState({refreshing: true});
-        AsyncStorage.getItem('access_token').then(access_token => {
-            if (access_token === null) {
-                this.props.navigation.navigate('Login');
-            } else {
-                fetch(API.USER_PROFILE + '?fields=', {
-                    method: 'GET',
-                    headers: {
-                        'access-token': access_token,
-                    },
-                }).then(response => response.json())
-                    .then(responseJson => {
-                        if (responseJson.success) {
-                            AsyncStorage.setItem('user_profile', JSON.stringify(responseJson.data)).then(() => {
-                                this.setState({user_profile: responseJson.data, refreshing: false});
-                            });
-                        } else {
-                            Toast.show(responseJson.message);
-                            this.setState({refreshing: false});
-                        }
-                    }).catch(() => {
-                    Toast.show("Có lỗi xảy ra, vui lòng thử lại");
-                    this.setState({refreshing: false});
+        if (this.state.refreshing) {
+            return;
+        }
+
+        this.setState({refreshing: true}, () => {
+            AsyncStorage.getItem('access_token').then(access_token => {
+                return services.myProfile(access_token);
+            }).catch(this._errorHandler).then(user_profile => {
+                return AsyncStorage.setItem('user_profile', JSON.stringify(user_profile)).then(() => {
+                    return new Promise(resolve => {
+                        this.setState({user_profile}, resolve)
+                    })
                 });
-            }
+            }).then(() => {
+                this.setState({refreshing: false})
+            });
         });
+    };
+
+    _errorHandler = (message) => {
+        Toast.show(message);
     };
 
     render() {
