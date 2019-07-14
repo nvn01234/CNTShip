@@ -1,9 +1,7 @@
 import React from 'react';
 import {AsyncStorage, RefreshControl, ScrollView, StyleSheet} from 'react-native';
 import Toast from "react-native-simple-toast";
-import ButtonSubmit from '@components/ButtonSubmit';
-import {ListItem} from 'react-native-elements';
-import {InfoText, Chevron} from '@components/ProfileScreen';
+import {InfoTextItem, Chevron, ButtonSubmit} from '@components'
 import services from '@services'
 
 export default class ProfileScreen extends React.Component {
@@ -63,17 +61,15 @@ export default class ProfileScreen extends React.Component {
                     />
                 }
             >
-                <InfoText text="Tên đăng nhập"/>
-                <ListItem
+                <InfoTextItem
+                    infoText={"Tên đăng nhập"}
                     hideChevron
                     title={this.state.user_profile ? this.state.user_profile.username : ''}
-                    containerStyle={styles.listItemContainer}
                 />
-                <InfoText text="Mật khẩu"/>
-                <ListItem
+                <InfoTextItem
+                    infoText={"Mật khẩu"}
                     title={this.state.user_profile ? '**********' : ''}
-                    containerStyle={styles.listItemContainer}
-                    onPress={() => {this.props.navigation.navigate('ChangePassword')}}
+                    onPress={this._gotoChangePasswordScreen}
                     rightIcon={<Chevron/>}
                 />
                 <ButtonSubmit style={styles.buttonLogout}
@@ -87,12 +83,17 @@ export default class ProfileScreen extends React.Component {
     _logout = () => {
         return Promise.all([
             AsyncStorage.removeItem('access_token'),
-            AsyncStorage.removeItem('user_profile')
+            AsyncStorage.removeItem('refresh_token'),
+            AsyncStorage.removeItem('user_profile'),
         ]);
     };
 
     _gotoLoginScreen = () => {
         this.props.navigation.navigate('Login');
+    };
+
+    _gotoChangePasswordScreen = () => {
+        this.props.navigation.navigate('ChangePassword');
     }
 }
 
@@ -100,11 +101,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-    },
-    listItemContainer: {
-        height: 55,
-        borderWidth: 0.5,
-        borderColor: '#ECECEC',
     },
     buttonLogout: {
         marginTop: 17,

@@ -65,7 +65,7 @@ export default class LoginScreen extends React.Component {
             if (this.state.action === 'register') {
                 const loginData = await services.login(formData);
                 await this._loginSuccess(loginData);
-            } else {
+            } else if (this.state.action === 'login') {
                 await this._loginSuccess(data);
             }
         } catch (message) {
@@ -79,9 +79,10 @@ export default class LoginScreen extends React.Component {
         }
     };
 
-    _loginSuccess = ({access_token}) => {
+    _loginSuccess = ({access_token, refresh_token}) => {
         return Promise.all([
             AsyncStorage.setItem('access_token', access_token),
+            AsyncStorage.setItem('refresh_token', refresh_token),
             AsyncStorage.removeItem('user_profile'),
         ]).then(() => {
             return new Promise((resolve) => {

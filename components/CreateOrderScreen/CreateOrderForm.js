@@ -6,19 +6,21 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import {formatNumber} from "@utils";
 import PaymentTypes from '@constants/PaymentTypes'
 import ShipFeeTypes from "@constants/ShipFeeTypes";
+import ButtonSubmit from '@components/ButtonSubmit'
 
 export default class CreateOrderForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            formData: {},
+            formData: {...props.formData},
             totalText: '',
         }
     }
 
     render() {
         return (
-            <KeyboardAwareScrollView style={styles.container}
+            <KeyboardAwareScrollView keyboardShouldPersistTaps={'always'}
+                                     style={styles.container}
                                      enableOnAndroid={true}
                                      enableAutoAutomaticScroll={true}
                                      extraScrollHeight={120}
@@ -28,7 +30,7 @@ export default class CreateOrderForm extends React.Component {
                         style={styles.input}
                         label='Địa chỉ lấy hàng'
                         value={this.state.formData.shop_address}
-                        onChangeText={this._onChangeField('shop_address')}
+                        onChangeText={this._onChangeShopAddress}
                         underlineColor={Colors.inputUnderline}
                         selectionColor={Colors.inputSelection}
                     />
@@ -36,15 +38,15 @@ export default class CreateOrderForm extends React.Component {
                         style={styles.input}
                         label='Mô tả đơn hàng'
                         value={this.state.formData.description}
-                        onChangeText={this._onChangeField('description')}
+                        onChangeText={this._onChangeDescription}
                         underlineColor={Colors.inputUnderline}
                         selectionColor={Colors.inputSelection}
                     />
                     <TextInput
                         style={styles.input}
-                        label='Họ tên người nhận'
+                        label='Tên người nhận'
                         value={this.state.formData.customer_name}
-                        onChangeText={this._onChangeField('customer_name')}
+                        onChangeText={this._onChangeCustomerName}
                         underlineColor={Colors.inputUnderline}
                         selectionColor={Colors.inputSelection}
                     />
@@ -52,7 +54,7 @@ export default class CreateOrderForm extends React.Component {
                         style={styles.input}
                         label='Điện thoại người nhận'
                         value={this.state.formData.customer_phone}
-                        onChangeText={this._onCustomerPhoneChanged}
+                        onChangeText={this._onChangeCustomerPhone}
                         underlineColor={Colors.inputUnderline}
                         selectionColor={Colors.inputSelection}
                         keyboardType={'numeric'}
@@ -61,7 +63,7 @@ export default class CreateOrderForm extends React.Component {
                         style={styles.input}
                         label='Địa chỉ người nhận'
                         value={this.state.formData.customer_address}
-                        onChangeText={this._onChangeField('customer_address')}
+                        onChangeText={this._onChangeCustomerAddress}
                         underlineColor={Colors.inputUnderline}
                         selectionColor={Colors.inputSelection}
                     />
@@ -70,14 +72,14 @@ export default class CreateOrderForm extends React.Component {
                             style={[styles.input, styles.flex2]}
                             label='Giá trị đơn hàng'
                             value={this.state.formData.total ? formatNumber(this.state.formData.total) : ''}
-                            onChangeText={this._onAmountChanged('total')}
+                            onChangeText={this._onChangeTotal}
                             underlineColor={Colors.inputUnderline}
                             selectionColor={Colors.inputSelection}
                             keyboardType={'numeric'}
                         />
                         <View style={styles.radioGroup}>
                             <RadioButton.Group
-                                onValueChange={this._onChangeField('payment_type')}
+                                onValueChange={this._onChangePaymentType}
                                 value={this.state.formData.payment_type}
                             >
                                 {this._renderRadioButtons(PaymentTypes)}
@@ -89,20 +91,33 @@ export default class CreateOrderForm extends React.Component {
                             style={[styles.input, styles.flex2]}
                             label='Phí ship'
                             value={this.state.formData.ship_fee ? formatNumber(this.state.formData.ship_fee) : ''}
-                            onChangeText={this._onAmountChanged('ship_fee')}
+                            onChangeText={this._onChangeShipFee}
                             underlineColor={Colors.inputUnderline}
                             selectionColor={Colors.inputSelection}
                             keyboardType={'numeric'}
                         />
                         <View style={styles.radioGroup}>
                             <RadioButton.Group
-                                onValueChange={this._onChangeField('ship_fee_type')}
+                                onValueChange={this._onChangeShipFeeType}
                                 value={this.state.formData.ship_fee_type}
                             >
                                 {this._renderRadioButtons(ShipFeeTypes)}
                             </RadioButton.Group>
                         </View>
                     </View>
+                    <TextInput
+                        style={styles.input}
+                        label='Ghi chú'
+                        value={this.state.formData.shop_note}
+                        onChangeText={this._onChangeShopNote}
+                        underlineColor={Colors.inputUnderline}
+                        selectionColor={Colors.inputSelection}
+                    />
+                    <ButtonSubmit text={this.props.title}
+                                  style={styles.buttonSubmit}
+                                  onPress={this.props.onSubmit}
+                                  onComplete={this.props.onSubmitComplete}
+                                  validate={this.props.validate}/>
                 </View>
             </KeyboardAwareScrollView>
         )
@@ -115,7 +130,11 @@ export default class CreateOrderForm extends React.Component {
         </View>
     ));
 
-    _onChangeField = (key) => (value) => {
+    _onChangeField = (key, formatter=null) => (value) => {
+        if (typeof formatter === 'function') {
+            value = formatter(value);
+        }
+
         const update = {};
         update[key] = value;
         const formData = Object.assign({}, this.state.formData, update);
@@ -123,16 +142,22 @@ export default class CreateOrderForm extends React.Component {
         this.props.onChange(formData);
     };
 
-    _onCustomerPhoneChanged = (customer_phone) => {
-        customer_phone = customer_phone.replace(/[^0-9]/g, '');
-        this._onChangeField('customer_phone')(customer_phone);
-    };
-
-    _onAmountChanged = (key) => (amount) => {
+    _amountFormatter = amount => {
         amount = amount.replace(/[^0-9]/g, '');
         amount = amount ? parseInt(amount) : 0;
-        this._onChangeField(key)(amount);
+        return amount;
     };
+
+    _onChangeShopAddress = this._onChangeField('shop_address');
+    _onChangeDescription = this._onChangeField('description');
+    _onChangeCustomerName = this._onChangeField('customer_name');
+    _onChangeCustomerPhone = this._onChangeField('customer_phone', customer_phone => customer_phone.replace(/[^0-9]/g, ''));
+    _onChangeCustomerAddress = this._onChangeField('customer_address');
+    _onChangeTotal = this._onChangeField('total', this._amountFormatter);
+    _onChangePaymentType = this._onChangeField('payment_type');
+    _onChangeShipFee = this._onChangeField('ship_fee', this._amountFormatter);
+    _onChangeShipFeeType = this._onChangeField('ship_fee_type');
+    _onChangeShopNote = this._onChangeField('shop_note');
 }
 
 const styles = StyleSheet.create({
@@ -156,4 +181,7 @@ const styles = StyleSheet.create({
     radioLabel: {
         marginTop: 8,
     },
+    buttonSubmit: {
+        marginTop: 20
+    }
 });

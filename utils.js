@@ -1,6 +1,11 @@
+import Moment from "moment";
+
+
 export const formatNumber = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
 };
+
+export const formatDateTime = (d) => Moment(d).format('HH:mm:ss DD/MM/YYYY');
 
 /**
  * Get query string

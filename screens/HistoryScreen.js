@@ -1,12 +1,13 @@
 import React from 'react';
-import {AsyncStorage, FlatList, RefreshControl, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, AsyncStorage, FlatList, RefreshControl, StyleSheet, Text, View} from 'react-native';
 import {Order} from "@components/OrdersScreen";
 import Toast from "react-native-simple-toast";
-import {formatNumber} from "@utils";
+import {formatNumber, formatDateTime} from "@utils";
 import PaymentTypes from "@constants/PaymentTypes";
 import ShipFeeTypes from "@constants/ShipFeeTypes";
 import {TotalText} from "@components/HistoryScreen";
 import services from '@services'
+import {LoadMoreComponent, EmptyComponent} from '@components'
 
 export default class HistoryScreen extends React.Component {
     static navigationOptions = {
@@ -21,16 +22,13 @@ export default class HistoryScreen extends React.Component {
             hasMore: true,
             refreshing: false,
             loadMore: false,
-            orders: [null],
+            orders: [],
             total: 0,
         }
     }
 
     _loadMoreData = () => {
-        if (this.state.loadMore) {
-            return;
-        }
-        if (!this.state.hasMore) {
+        if (this.state.loadMore || this.state.refreshing || !this.state.hasMore) {
             return;
         }
         this.setState({page: this.state.page + 1, loadMore: true}, () => {
@@ -61,10 +59,13 @@ export default class HistoryScreen extends React.Component {
         }
 
         const {orders, hasMore} = response;
-        const newOrders = this.state.refreshing ? [null, ...orders] : [...this.state.orders, ...orders];
-        const total = newOrders.filter(order => order !== null && order.payment_type === 'cod')
-                               .map(order => order.total)
-                               .reduce((total, amount) => total+amount, 0);
+        let newOrders = (this.state.refreshing ? orders : [...this.state.orders, ...orders]).filter(order => order !== null);
+        const total = newOrders.filter(order => order.payment_type === 'cod')
+                                .map(order => order.total)
+                                .reduce((total, amount) => total+amount, 0);
+        if (newOrders.length > 0) {
+            newOrders = [null, ...newOrders]
+        }
 
         await new Promise((resolve) => {
             this.setState({orders: newOrders, hasMore, total}, resolve)
@@ -78,7 +79,7 @@ export default class HistoryScreen extends React.Component {
                     onEndReached={this._loadMoreData}
                     onEndReachedThreshold={0.4}
                     style={styles.container}
-                    contentContainerStyle={styles.contentContainer}
+                    contentContainerStyle={[styles.contentContainer, (!this.state.refreshing && this.state.orders.length === 0) ? styles.centerEmptySet : {}]}
                     refreshControl={
                         <RefreshControl
                             refreshing={this.state.refreshing}
@@ -88,13 +89,15 @@ export default class HistoryScreen extends React.Component {
                     data={this.state.orders}
                     renderItem={this._renderOrder}
                     keyExtractor={this._keyExtractor}
+                    ListFooterComponent={<LoadMoreComponent loading={this.state.loadMore}/>}
+                    ListEmptyComponent={<EmptyComponent refreshing={this.state.refreshing} text='Chưa có đơn nào'/>}
                 />
             </View>
         );
     }
 
     _keyExtractor = (item, index) => {
-        return item === null ? 'null' : item._id;
+        return item === null ? 'null' : item.order_id;
     };
 
     _renderOrder = ({item}) => {
@@ -104,37 +107,33 @@ export default class HistoryScreen extends React.Component {
             </View>
         } else {
             return <Order
+                data={item}
                 itemCustomer={`${item.customer_name} (${item.customer_phone})`}
                 itemAddress={item.customer_address}
                 itemAmount={`${formatNumber(item.total)} (${PaymentTypes[item.payment_type]}) | ${formatNumber(item.ship_fee)} (${ShipFeeTypes[item.ship_fee_type]})`}
-                itemTimestamp={item.delivered_at}
+                itemTimestamp={formatDateTime(item.delivered_at)}
                 onPress={this._gotoOrderDetailScreen}
             />
         }
     };
 
-    _gotoOrderDetailScreen = () => {
-        this.props.navigation.navigate('OrderDetail');
+    _gotoOrderDetailScreen = (order) => {
+        this.props.navigation.navigate('OrderDetail', {order});
     };
 
     _onRefresh = () => {
-        this.setState({refreshing: true, page: 1, hasMore: true}, () => {
-            this._getCurrentPage().then(() => {
-                this.setState({refreshing: false});
+        return new Promise(resolve => {
+            this.setState({refreshing: true, page: 1, hasMore: true}, () => {
+                this._getCurrentPage().then(() => {
+                    this.setState({refreshing: false}, resolve);
+                });
             });
         });
+
     };
 
     componentDidMount() {
-        this.setState({refreshing: true}, () => {
-            this.initialList = setTimeout(this._onRefresh, 1);
-        })
-    }
-
-    componentWillUnmount() {
-        if (this.initialList) {
-            clearTimeout(this.initialList);
-        }
+        this._onRefresh().then(() => {});
     }
 }
 
@@ -148,5 +147,8 @@ const styles = StyleSheet.create({
     },
     totalContainer: {
         marginTop: 20,
+    },
+    centerEmptySet: {
+        justifyContent: 'center', alignItems: 'center', height: '100%'
     },
 });

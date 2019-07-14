@@ -1,5 +1,5 @@
 import React from 'react'
-import {FlatList, RefreshControl, StyleSheet, View, AsyncStorage, TouchableOpacity} from 'react-native'
+import {FlatList, RefreshControl, StyleSheet, View, AsyncStorage, TouchableOpacity, Text} from 'react-native'
 import {Order} from '@components/OrdersScreen'
 import Toast from "react-native-simple-toast"
 import OrderStatuses from '@constants/OrderStatuses'
@@ -8,21 +8,28 @@ import ShipFeeTypes from '@constants/ShipFeeTypes'
 import {formatNumber} from '@utils'
 import {Icon} from "react-native-elements"
 import services from '@services'
+import {EmptyComponent, LoadMoreComponent} from '@components'
 
 export default class OrdersScreen extends React.Component {
-    static navigationOptions = ({navigation}) => ({
-        title: 'Đơn online',
-        headerRight: (
-            <TouchableOpacity  onPress={() => {navigation.navigate('CreateOrder')}} style={styles.buttonAddOrder}>
-                <Icon
-                    type='font-awesome'
-                    name="plus-circle"
-                    size={30}
-                    color='#0F8FCC'
-                />
-            </TouchableOpacity>
-        ),
-    });
+    static navigationOptions = ({navigation}) => (
+        {
+            title: 'Đơn online',
+            headerRight: (
+                <TouchableOpacity  onPress={() => {navigation.navigate('CreateOrder', {
+                    title: 'Tạo đơn',
+                    addOrUpdateOrder: navigation.getParam('addOrUpdateOrder'),
+                    service: 'createOrder',
+                })}} style={styles.buttonAddOrder}>
+                    <Icon
+                        type='font-awesome'
+                        name="plus-circle"
+                        size={30}
+                        color='#0F8FCC'
+                    />
+                </TouchableOpacity>
+            ),
+        }
+    );
 
     constructor(props) {
         super(props);
@@ -37,10 +44,7 @@ export default class OrdersScreen extends React.Component {
     }
 
     _loadMoreData = () => {
-        if (this.state.loadMore) {
-            return;
-        }
-        if (!this.state.hasMore) {
+        if (this.state.loadMore || this.state.refreshing || !this.state.hasMore) {
             return;
         }
         this.setState({page: this.state.page + 1, loadMore: true}, () => {
@@ -50,14 +54,14 @@ export default class OrdersScreen extends React.Component {
         });
     };
 
-    render() {
+    render = () => {
         return (
             <View style={styles.container}>
                 <FlatList
                     onEndReached={this._loadMoreData}
                     onEndReachedThreshold={0.4}
                     style={styles.container}
-                    contentContainerStyle={styles.contentContainer}
+                    contentContainerStyle={[styles.contentContainer, (!this.state.refreshing && this.state.orders.length === 0) ? styles.centerEmptySet : {}]}
                     refreshControl={
                         <RefreshControl
                             refreshing={this.state.refreshing}
@@ -67,16 +71,19 @@ export default class OrdersScreen extends React.Component {
                     data={this.state.orders}
                     renderItem={this._renderOrder}
                     keyExtractor={this._keyExtractor}
+                    ListFooterComponent={<LoadMoreComponent loading={this.state.loadMore}/>}
+                    ListEmptyComponent={<EmptyComponent refreshing={this.state.refreshing} text='Chưa có đơn nào'/>}
                 />
             </View>
         );
-    }
+    };
 
     _keyExtractor = (item, index) => {
-        return item._id;
+        return item.order_id;
     };
 
     _renderOrder = ({item}) => <Order
+        data={item}
         itemCustomer={`${item.customer_name} (${item.customer_phone})`}
         itemAddress={item.customer_address}
         itemAmount={`${formatNumber(item.total)} (${PaymentTypes[item.payment_type]}) | ${formatNumber(item.ship_fee)} (${ShipFeeTypes[item.ship_fee_type]})`}
@@ -84,8 +91,8 @@ export default class OrdersScreen extends React.Component {
         onPress={this._gotoOrderDetailScreen}
     />;
 
-    _gotoOrderDetailScreen = () => {
-        this.props.navigation.navigate('OrderDetail');
+    _gotoOrderDetailScreen = (order) => {
+        this.props.navigation.navigate('OrderDetail', {order});
     };
 
     _errorHandler = (message) => {
@@ -116,23 +123,49 @@ export default class OrdersScreen extends React.Component {
     };
 
     _onRefresh = () => {
-        this.setState({refreshing: true, page: 1, hasMore: true}, () => {
-            this._getCurrentPage().then(() => {
-                this.setState({refreshing: false});
+        return new Promise(resolve => {
+            this.setState({refreshing: true, page: 1, hasMore: true}, () => {
+                this._getCurrentPage().then(() => {
+                    this.setState({refreshing: false}, resolve);
+                });
             });
+        })
+    };
+
+    _addOrder = async (newOrder) => {
+        const newOrders = [newOrder, ...this.state.orders];
+        await new Promise(resolve => {
+            this.setState({orders: newOrders}, resolve);
+        })
+    };
+
+    _updateOrder = async (order) => {
+        const newOrders = this.state.orders.map(_order => {
+            if (order.order_id === _order.order_id) {
+                return {..._order, ...order}
+            }
+            return _order
         });
+        await new Promise(resolve => {
+            this.setState({orders: newOrders}, resolve);
+        })
+    };
+
+    _addOrUpdateOrder = (order) => {
+        if (this.state.orders.some(o => o.order_id === order.order_id)) {
+            // Update
+            return this._updateOrder(order);
+        } else {
+            // Add
+            return this._addOrder(order);
+        }
     };
 
     componentDidMount() {
-        this.setState({refreshing: true}, () => {
-            this.initialList = setTimeout(this._onRefresh, 1);
-        })
-    }
-
-    componentWillUnmount() {
-        if (this.initialList) {
-            clearTimeout(this.initialList);
-        }
+        this.props.navigation.setParams({
+            addOrUpdateOrder: this._addOrUpdateOrder,
+        });
+        this._onRefresh().then(() => {});
     }
 }
 
@@ -146,5 +179,8 @@ const styles = StyleSheet.create({
     },
     buttonAddOrder: {
         marginRight: 16,
-    }
+    },
+    centerEmptySet: {
+        justifyContent: 'center', alignItems: 'center', height: '100%'
+    },
 });

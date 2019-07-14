@@ -15,22 +15,22 @@ export default class AuthForm extends React.Component {
     render() {
         return (
             <KeyboardAvoidingView behavior="padding" style={[styles.container, this.props.style]}>
-                <UsernameInput onChangeText={this._onChangeText('username')}/>
+                <UsernameInput onChangeText={this._onChangeUsername}/>
                 {this.props.showPasswordInput && (
                     <PasswordInput placeholder='Mật khẩu'
-                                   onChangeText={this._onChangeText('password')}
+                                   onChangeText={this._onChangePassword}
                                    inputWrapperStyle={styles.inputWrapper}/>
                 )}
                 {this.props.showConfirmPasswordInput && (
                     <PasswordInput placeholder='Nhập lại mật khẩu'
-                                   onChangeText={this._onChangeText('confirmPassword')}
+                                   onChangeText={this._onChangeConfirmPassword}
                                    inputWrapperStyle={styles.inputWrapper}/>
                 )}
             </KeyboardAvoidingView>
         )
     }
 
-    _onChangeText = (key) => (value) => {
+    _onChangeField = (key) => (value) => {
         const update = {};
         update[key] = value;
 
@@ -45,6 +45,10 @@ export default class AuthForm extends React.Component {
         this.setState({formData});
         this.props.onChange(formData);
     };
+
+    _onChangeUsername = this._onChangeField('username');
+    _onChangePassword = this._onChangeField('password');
+    _onChangeConfirmPassword = this._onChangeField('confirmPassword');
 }
 
 const styles = StyleSheet.create({

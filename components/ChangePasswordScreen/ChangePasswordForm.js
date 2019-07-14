@@ -15,25 +15,29 @@ export default class ChangePasswordForm extends React.Component {
         return (
             <KeyboardAvoidingView behavior="padding" style={styles.container}>
                 <PasswordInput placeholder='Mật khẩu cũ'
-                               onChangeText={this._onChangeText('oldPassword')}
+                               onChangeText={this._onChangeOldPassword}
                                inputWrapperStyle={styles.inputWrapper}/>
                 <PasswordInput placeholder='Mật khẩu mới'
-                               onChangeText={this._onChangeText('newPassword')}
+                               onChangeText={this._onChangeNewPassword}
                                inputWrapperStyle={styles.inputWrapper}/>
                 <PasswordInput placeholder='Nhập lại mật khẩu mới'
-                               onChangeText={this._onChangeText('confirmNewPassword')}
+                               onChangeText={this._onChangeConfirmNewPassword}
                                inputWrapperStyle={styles.inputWrapper}/>
             </KeyboardAvoidingView>
         )
     }
 
-    _onChangeText = (key) => (value) => {
+    _onChangeField = (key) => (value) => {
         const update = {};
         update[key] = value;
         const formData = Object.assign({}, this.state.formData, update);
         this.setState({formData});
         this.props.onChange(formData);
     };
+
+    _onChangeOldPassword = this._onChangeField('oldPassword');
+    _onChangeNewPassword = this._onChangeField('newPassword');
+    _onChangeConfirmNewPassword = this._onChangeField('confirmNewPassword');
 }
 
 const styles = StyleSheet.create({
