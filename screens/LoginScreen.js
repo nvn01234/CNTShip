@@ -1,11 +1,11 @@
 import React from 'react';
-import {AsyncStorage, StyleSheet, View} from 'react-native';
+import {AsyncStorage, StyleSheet, KeyboardAvoidingView} from 'react-native';
 import Toast from "react-native-simple-toast";
 import services from '@services'
-import {ACTION_TO_STATE, BUTTON_TEXTS} from '@constants/LoginButtons'
-import ButtonSubmit from '@components/ButtonSubmit';
-import {Logo, BottomSection, AuthForm} from '@components/LoginScreen';
+import {ACTION_TO_STATE} from '@constants/LoginButtons'
+import {Logo, AuthForm} from '@components/LoginScreen';
 import Colors from '@constants/Colors'
+import {validateEmail} from '@utils'
 
 
 export default class LoginScreen extends React.Component {
@@ -21,28 +21,39 @@ export default class LoginScreen extends React.Component {
 
     render() {
         return (
-            <View style={styles.container}>
+            <KeyboardAvoidingView behavior="padding" style={styles.container}>
                 <Logo/>
-                <AuthForm style={styles[`flex_${this.state.action}`]}
+                <AuthForm
                           onChange={this._onFormChange}
+                          showEmailInput={this.state.showEmailInput}
+                          showUsernameInput={this.state.showUsernameInput}
                           showPasswordInput={this.state.showPasswordInput}
-                          showConfirmPasswordInput={this.state.showConfirmPasswordInput} />
-                <BottomSection style={styles[`flex_${this.state.action}`]}
-                               leftAction={this.state.leftAction}
-                               rightAction={this.state.rightAction}
-                               switchAction={this._switchAction}/>
-                <ButtonSubmit text={BUTTON_TEXTS[this.state.action]}
-                              validate={this._validateForm}
-                              onPress={this._submitForm}
-                              onComplete={this._formSubmitCompleted}
-                              style={styles[`btn_${this.state.action}`]}/>
-            </View>
+                          showConfirmPasswordInput={this.state.showConfirmPasswordInput}
+                          validateForm={this._validateForm}
+                          submitForm={this._submitForm}
+                          formSubmitCompleted={this._formSubmitCompleted}
+                          submitAction={this.state.action}
+                          leftAction={this.state.leftAction}
+                          rightAction={this.state.rightAction}
+                          switchAction={this._switchAction}
+                />
+            </KeyboardAvoidingView>
         );
     }
 
     _validateForm = () => {
-        const {username, password, confirmPassword} = this.state.formData;
-        if (!username) {
+        const {email, username, password, confirmPassword} = this.state.formData;
+        if (this.state.showEmailInput) {
+            if (!email) {
+                Toast.show('Vui lòng nhập địa chỉ email');
+                return false;
+            }
+            if (!validateEmail(email)) {
+                Toast.show('Địa chỉ email không hợp lệ');
+                return false;
+            }
+        }
+        if (this.state.showUsernameInput && !username) {
             Toast.show('Vui lòng nhập tên đăng nhập');
             return false;
         }
@@ -67,6 +78,8 @@ export default class LoginScreen extends React.Component {
                 await this._loginSuccess(loginData);
             } else if (this.state.action === 'login') {
                 await this._loginSuccess(data);
+            } else if (this.state.action === 'resetPassword') {
+                Toast.show('Yêu cầu khôi phục mật khẩu thành công, vui lòng kiểm tra hòm thư', Toast.LONG);
             }
         } catch (message) {
             this._errorHandler(message);
@@ -107,28 +120,6 @@ export default class LoginScreen extends React.Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
         backgroundColor: Colors.loginBackground,
-    },
-
-    btn_register: {
-        top: -135,
-    },
-    btn_login: {
-        top: -95,
-    },
-    btn_resetPassword: {
-        top: -95,
-    },
-
-    flex_register: {
-        flex: 2,
-    },
-    flex_login: {
-        flex: 1,
-    },
-    flex_resetPassword: {
-        flex: 1,
     },
 });

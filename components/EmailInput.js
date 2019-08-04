@@ -1,21 +1,23 @@
 import React, {Component} from 'react';
 import {Dimensions, Image, StyleSheet, TextInput, View} from 'react-native';
-import usernameImg from '@assets/images/username.png';
+import emailImg from '@assets/images/email.png';
 
-export default class UsernameInput extends Component {
+export default class EmailInput extends Component {
     render() {
         return (
             <View style={this.props.inputWrapperStyle}>
-                <Image source={usernameImg} style={styles.inlineImg}/>
+                <Image source={emailImg} style={styles.inlineImg}/>
                 <TextInput
                     style={styles.input}
-                    placeholder="Tên đăng nhập"
+                    placeholder="Địa chỉ email"
                     returnKeyType={'done'}
                     autoCapitalize={'none'}
                     autoCorrect={false}
                     placeholderTextColor="white"
                     underlineColorAndroid="transparent"
                     onChangeText={this.props.onChangeText}
+                    autoCompleteType='email'
+                    keyboardType='email-address'
                 />
             </View>
         );

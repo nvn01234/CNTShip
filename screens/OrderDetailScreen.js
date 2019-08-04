@@ -77,18 +77,18 @@ export default class OrderDetailScreen extends React.Component {
                     value={order.customer_address}
                     disabled={true}
                 />
-                <TextInput
+                {order.total ? (<TextInput
                     style={styles.input}
                     label='Giá trị đơn hàng'
                     value={`${formatNumber(order.total)} (${PaymentTypes[order.payment_type]})`}
                     disabled={true}
-                />
-                <TextInput
+                />): null}
+                {order.ship_fee ? (<TextInput
                     style={styles.input}
                     label='Phí ship'
                     value={`${formatNumber(order.ship_fee)} (${ShipFeeTypes[order.ship_fee_type]})`}
                     disabled={true}
-                />
+                />): null}
                 {order.shop_note ? (<TextInput
                     style={styles.input}
                     label='Ghi chú của shop'

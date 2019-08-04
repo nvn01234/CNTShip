@@ -71,7 +71,7 @@ export default class CreateOrderForm extends React.Component {
                         <TextInput
                             style={[styles.input, styles.flex2]}
                             label='Giá trị đơn hàng'
-                            value={this.state.formData.total ? formatNumber(this.state.formData.total) : ''}
+                            value={typeof this.state.formData.total === 'number' ? formatNumber(this.state.formData.total) : ''}
                             onChangeText={this._onChangeTotal}
                             underlineColor={Colors.inputUnderline}
                             selectionColor={Colors.inputSelection}
@@ -90,7 +90,7 @@ export default class CreateOrderForm extends React.Component {
                         <TextInput
                             style={[styles.input, styles.flex2]}
                             label='Phí ship'
-                            value={this.state.formData.ship_fee ? formatNumber(this.state.formData.ship_fee) : ''}
+                            value={typeof this.state.formData.ship_fee === 'number' ? formatNumber(this.state.formData.ship_fee) : ''}
                             onChangeText={this._onChangeShipFee}
                             underlineColor={Colors.inputUnderline}
                             selectionColor={Colors.inputSelection}
@@ -144,7 +144,7 @@ export default class CreateOrderForm extends React.Component {
 
     _amountFormatter = amount => {
         amount = amount.replace(/[^0-9]/g, '');
-        amount = amount ? parseInt(amount) : 0;
+        amount = amount ? parseInt(amount) : null;
         return amount;
     };
 

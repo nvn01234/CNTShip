@@ -62,6 +62,11 @@ export default class ProfileScreen extends React.Component {
                 }
             >
                 <InfoTextItem
+                    infoText={"Địa chỉ email"}
+                    hideChevron
+                    title={this.state.user_profile ? this.state.user_profile.email : ''}
+                />
+                <InfoTextItem
                     infoText={"Tên đăng nhập"}
                     hideChevron
                     title={this.state.user_profile ? this.state.user_profile.username : ''}

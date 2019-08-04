@@ -1,4 +1,6 @@
 import Moment from "moment";
+import PaymentTypes from '@constants/PaymentTypes'
+import ShipFeeTypes from '@constants/ShipFeeTypes'
 
 
 export const formatNumber = (num) => {
@@ -23,4 +25,20 @@ export const querystring = (query = {}) => {
         .join('&');
 
     return qs && '?' + qs;
+};
+
+export const validateEmail = (email) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+};
+
+export const orderAmountText = (order) => {
+    const parts = [];
+    if (order.total) {
+        parts.push(`${formatNumber(order.total)} (${PaymentTypes[order.payment_type]})`);
+    }
+    if (order.ship_fee) {
+        parts.push(`${formatNumber(order.ship_fee)} (${ShipFeeTypes[order.ship_fee_type]})`);
+    }
+    return parts.join(' | ');
 };

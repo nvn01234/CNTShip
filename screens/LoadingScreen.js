@@ -35,6 +35,7 @@ export default class LoadingScreen extends React.Component {
             Asset.loadAsync([
                 require('../assets/images/icon.png'),
                 require('../assets/images/eye_black.png'),
+                require('../assets/images/email.png'),
                 require('../assets/images/username.png'),
                 require('../assets/images/password.png'),
                 require('../assets/images/logo.png'),

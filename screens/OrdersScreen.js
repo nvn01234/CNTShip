@@ -1,11 +1,9 @@
 import React from 'react'
-import {FlatList, RefreshControl, StyleSheet, View, AsyncStorage, TouchableOpacity, Text} from 'react-native'
+import {FlatList, RefreshControl, StyleSheet, View, AsyncStorage, TouchableOpacity} from 'react-native'
 import {Order} from '@components/OrdersScreen'
 import Toast from "react-native-simple-toast"
 import OrderStatuses from '@constants/OrderStatuses'
-import PaymentTypes from '@constants/PaymentTypes'
-import ShipFeeTypes from '@constants/ShipFeeTypes'
-import {formatNumber} from '@utils'
+import {orderAmountText} from '@utils'
 import {Icon} from "react-native-elements"
 import services from '@services'
 import {EmptyComponent, LoadMoreComponent} from '@components'
@@ -86,7 +84,7 @@ export default class OrdersScreen extends React.Component {
         data={item}
         itemCustomer={`${item.customer_name} (${item.customer_phone})`}
         itemAddress={item.customer_address}
-        itemAmount={`${formatNumber(item.total)} (${PaymentTypes[item.payment_type]}) | ${formatNumber(item.ship_fee)} (${ShipFeeTypes[item.ship_fee_type]})`}
+        itemAmount={orderAmountText(item)}
         itemStatus={OrderStatuses[item.status]}
         onPress={this._gotoOrderDetailScreen}
     />;

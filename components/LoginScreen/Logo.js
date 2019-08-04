@@ -15,12 +15,12 @@ export default class Logo extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 3,
+        flexGrow: 1,
         alignItems: 'center',
         justifyContent: 'center',
     },
     image: {
-        width: 120,
-        height: 120,
+        width: 100,
+        height: 100,
     },
 });
